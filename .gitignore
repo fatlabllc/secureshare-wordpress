@@ -1,5 +1,9 @@
 # WordPress Plugin Development .gitignore
 
+# Development documentation (local only)
+CLAUDE.md
+README-DEV.md
+
 # Development files
 .DS_Store
 .idea/
@@ -12,6 +16,7 @@
 node_modules/
 vendor/
 *.zip
+*.tar.gz
 
 # Local configuration
 .env
