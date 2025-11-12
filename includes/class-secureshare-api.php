@@ -33,11 +33,6 @@ class SecureShare_API {
                     'type' => 'string',
                     'sanitize_callback' => 'sanitize_textarea_field',
                     'validate_callback' => array($this, 'validate_secret')
-                ),
-                'nonce' => array(
-                    'required' => true,
-                    'type' => 'string',
-                    'sanitize_callback' => 'sanitize_text_field'
                 )
             )
         ));
@@ -65,9 +60,9 @@ class SecureShare_API {
      * @return WP_REST_Response|WP_Error Response with secret URL or error.
      */
     public function create_secret($request) {
-        // Verify nonce
-        $nonce = $request->get_param('nonce');
-        if (!wp_verify_nonce($nonce, 'secureshare_create')) {
+        // Verify nonce from header
+        $nonce = $request->get_header('X-WP-Nonce');
+        if (!$nonce || !wp_verify_nonce($nonce, 'secureshare_create')) {
             return new WP_Error(
                 'invalid_nonce',
                 __('Security check failed', 'secureshare'),

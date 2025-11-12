@@ -51,10 +51,10 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-WP-Nonce': secureshareData.nonce
                 },
                 body: JSON.stringify({
-                    secret: secret,
-                    nonce: secureshareData.nonce
+                    secret: secret
                 })
             })
             .then(response => response.json())
