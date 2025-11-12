@@ -59,6 +59,7 @@
     font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
     resize: vertical;
     transition: border-color 0.2s;
+    box-sizing: border-box;
 }
 
 .secureshare-textarea:focus {

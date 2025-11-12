@@ -3,7 +3,7 @@
  * Plugin Name: SecureShare
  * Plugin URI: https://github.com/fatlabllc/secureshare-wordpress
  * Description: Securely share passwords and sensitive information via time-limited, encrypted links. Create secrets that automatically expire after 24 hours.
- * Version: 1.0.4
+ * Version: 1.0.5
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: FatLab Web Support
@@ -22,7 +22,7 @@ if (!defined('WPINC')) {
 /**
  * Plugin version.
  */
-define('SECURESHARE_VERSION', '1.0.4');
+define('SECURESHARE_VERSION', '1.0.5');
 
 /**
  * Plugin directory path.
