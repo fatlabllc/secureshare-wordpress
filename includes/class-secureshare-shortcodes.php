@@ -17,23 +17,19 @@ class SecureShare_Shortcodes {
      */
     public function __construct() {
         add_shortcode('secureshare', array($this, 'smart_shortcode'));
-        add_shortcode('secureshare_create', array($this, 'create_shortcode'));
-        add_shortcode('secureshare_view', array($this, 'view_shortcode'));
 
         // Enqueue assets when shortcode is detected
         add_filter('the_content', array($this, 'detect_shortcodes'), 1);
     }
 
     /**
-     * Detect if any SecureShare shortcodes are present and enqueue assets.
+     * Detect if SecureShare shortcode is present and enqueue assets.
      *
      * @param string $content The post content.
      * @return string The unmodified content.
      */
     public function detect_shortcodes($content) {
-        if (has_shortcode($content, 'secureshare') ||
-            has_shortcode($content, 'secureshare_create') ||
-            has_shortcode($content, 'secureshare_view')) {
+        if (has_shortcode($content, 'secureshare')) {
             $this->enqueue_assets();
         }
 
@@ -96,35 +92,6 @@ class SecureShare_Shortcodes {
         } else {
             return $this->render_create_template();
         }
-    }
-
-    /**
-     * Create form shortcode handler.
-     *
-     * @param array $atts Shortcode attributes.
-     * @return string The rendered shortcode output.
-     */
-    public function create_shortcode($atts) {
-        return $this->render_create_template();
-    }
-
-    /**
-     * View secret shortcode handler.
-     *
-     * @param array $atts Shortcode attributes.
-     * @return string The rendered shortcode output.
-     */
-    public function view_shortcode($atts) {
-        // Check for token parameter in shortcode attributes or URL
-        $token = isset($atts['token']) ? $atts['token'] : $this->get_token_from_request();
-
-        if (!$token) {
-            return '<div class="secureshare-error">' .
-                   esc_html__('No secret token provided', 'secureshare') .
-                   '</div>';
-        }
-
-        return $this->render_view_template($token);
     }
 
     /**

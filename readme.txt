@@ -4,7 +4,7 @@ Tags: security, password, secret, encryption, sharing
 Requires at least: 6.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,11 +44,14 @@ SecureShare allows you to securely share sensitive information like passwords, A
 * **Nonce Protection**: CSRF protection on all forms and AJAX requests
 * **Rate Limiting**: Configurable IP-based rate limiting prevents abuse
 
-= Available Shortcodes =
+= Shortcode =
 
-* `[secureshare]` - Smart shortcode that shows create form or view secret based on URL parameters
-* `[secureshare_create]` - Always displays the create secret form
-* `[secureshare_view]` - Displays the view secret interface (requires token parameter)
+Use the `[secureshare]` shortcode on any page or post. It automatically detects whether to show the create form or view interface based on the URL.
+
+* When visited normally (e.g., `/share/`) - Shows the create secret form
+* When visited with a token (e.g., `/share/?token=abc123`) - Shows the secret viewer
+
+Simply add `[secureshare]` to your page content and it handles everything!
 
 = Admin Features =
 
@@ -450,6 +453,12 @@ For a complete list of classes, view the plugin's CSS file at:
 5. Admin settings - Statistics dashboard
 
 == Changelog ==
+
+= 1.0.4 - 2025-11-12 =
+* Simplification: Removed separate [secureshare_create] and [secureshare_view] shortcodes
+* Only [secureshare] shortcode remains - automatically detects create vs view mode
+* Updated documentation to reflect simplified usage
+* Cleaner, easier-to-understand implementation for v1.0
 
 = 1.0.3 - 2025-11-12 =
 * Fix: Remove nonce verification requirement for public REST API endpoints
