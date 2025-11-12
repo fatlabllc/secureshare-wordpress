@@ -1,0 +1,29 @@
+# WordPress Plugin Development .gitignore
+
+# Development files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build files
+node_modules/
+vendor/
+*.zip
+
+# Local configuration
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+Thumbs.db
+.Spotlight-V100
+.Trashes
