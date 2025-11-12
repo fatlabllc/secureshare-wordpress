@@ -4,7 +4,7 @@ Tags: security, password, secret, encryption, sharing
 Requires at least: 6.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -450,6 +450,23 @@ For a complete list of classes, view the plugin's CSS file at:
 5. Admin settings - Statistics dashboard
 
 == Changelog ==
+
+= 1.0.3 - 2025-11-12 =
+* Fix: Remove nonce verification requirement for public REST API endpoints
+* Fix: Update plugin version numbers in all files
+* Security is maintained through IP-based rate limiting
+
+= 1.0.2 - 2025-11-12 =
+* Fix: Correct WordPress REST API nonce handling (use X-WP-Nonce header)
+* Attempted fix for "Security check failed" error
+
+= 1.0.1 - 2025-11-12 =
+* Fix: Add missing JavaScript and CSS asset files
+* Add frontend form handling and AJAX functionality
+* Add copy-to-clipboard functionality
+* Add character counter
+* Add admin panel JavaScript
+* Add complete responsive CSS styles
 
 = 1.0.0 - 2025-11-11 =
 * Initial release

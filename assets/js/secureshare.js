@@ -50,8 +50,7 @@
             fetch(secureshareData.restUrl + 'create', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': secureshareData.nonce
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     secret: secret

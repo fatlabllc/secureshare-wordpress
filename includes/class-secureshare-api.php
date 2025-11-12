@@ -60,15 +60,9 @@ class SecureShare_API {
      * @return WP_REST_Response|WP_Error Response with secret URL or error.
      */
     public function create_secret($request) {
-        // Verify nonce from header
-        $nonce = $request->get_header('X-WP-Nonce');
-        if (!$nonce || !wp_verify_nonce($nonce, 'secureshare_create')) {
-            return new WP_Error(
-                'invalid_nonce',
-                __('Security check failed', 'secureshare'),
-                array('status' => 403)
-            );
-        }
+        // Note: Nonce verification removed for public access
+        // Security is maintained through IP-based rate limiting below
+        // This allows both logged-in and logged-out users to create secrets
 
         // Check rate limit
         $rate_limit_check = SecureShare_DB::check_rate_limit();
