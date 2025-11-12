@@ -27,7 +27,7 @@ class SecureShare_DB {
         $expiration_time = get_option('secureshare_expiration_time', 86400);
 
         $current_time = current_time('mysql');
-        $expires_at = date('Y-m-d H:i:s', strtotime($current_time) + $expiration_time);
+        $expires_at = gmdate('Y-m-d H:i:s', strtotime($current_time) + $expiration_time);
 
         $result = $wpdb->insert(
             $table,
@@ -140,7 +140,7 @@ class SecureShare_DB {
         $ip_hash = hash('sha256', $ip . wp_salt('nonce'));
 
         $current_time = current_time('mysql');
-        $window_start = date('Y-m-d H:i:s', strtotime($current_time) - $window_seconds);
+        $window_start = gmdate('Y-m-d H:i:s', strtotime($current_time) - $window_seconds);
 
         // Get existing rate limit record
         $record = $wpdb->get_row($wpdb->prepare(
@@ -211,7 +211,7 @@ class SecureShare_DB {
         global $wpdb;
 
         $table = secureshare_get_rate_limits_table();
-        $cutoff = date('Y-m-d H:i:s', current_time('timestamp') - (7 * 24 * 3600)); // 7 days ago
+        $cutoff = gmdate('Y-m-d H:i:s', current_time('timestamp') - (7 * 24 * 3600)); // 7 days ago
 
         $deleted = $wpdb->query($wpdb->prepare(
             "DELETE FROM $table WHERE window_start < %s",
@@ -249,7 +249,7 @@ class SecureShare_DB {
         ));
 
         // Rate limit records (last 7 days)
-        $seven_days_ago = date('Y-m-d H:i:s', current_time('timestamp') - (7 * 24 * 3600));
+        $seven_days_ago = gmdate('Y-m-d H:i:s', current_time('timestamp') - (7 * 24 * 3600));
         $rate_limit_records = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM $rate_limits_table WHERE window_start > %s",
             $seven_days_ago
@@ -285,7 +285,7 @@ class SecureShare_DB {
 
         foreach ($ip_keys as $key) {
             if (array_key_exists($key, $_SERVER) === true) {
-                foreach (explode(',', $_SERVER[$key]) as $ip) {
+                foreach (explode(',', sanitize_text_field(wp_unslash($_SERVER[$key]))) as $ip) {
                     $ip = trim($ip);
                     if (filter_var($ip, FILTER_VALIDATE_IP) !== false) {
                         return $ip;

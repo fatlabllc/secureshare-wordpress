@@ -11,8 +11,8 @@ if (!defined('WPINC')) {
     die;
 }
 
-$max_size = $data['max_secret_size'];
-$expiration_hours = round($data['expiration_time'] / 3600);
+$secureshare_max_size = $data['max_secret_size'];
+$secureshare_expiration_hours = round($data['expiration_time'] / 3600);
 ?>
 
 <div class="secureshare-container">
@@ -20,10 +20,10 @@ $expiration_hours = round($data['expiration_time'] / 3600);
         <h2><?php esc_html_e('Share a Secret Securely', 'secureshare'); ?></h2>
         <p class="secureshare-description">
             <?php
-            /* translators: %d: number of hours until link expires */
             printf(
+                /* translators: %d: number of hours until link expires */
                 esc_html__('Create an encrypted link that expires in %d hours. Perfect for sharing passwords, API keys, or other sensitive information.', 'secureshare'),
-                $expiration_hours
+                (int) $secureshare_expiration_hours
             ); ?>
         </p>
     </div>
@@ -38,11 +38,11 @@ $expiration_hours = round($data['expiration_time'] / 3600);
                 name="secret"
                 class="secureshare-textarea"
                 placeholder="<?php esc_attr_e('Enter your password, API key, or other sensitive information...', 'secureshare'); ?>"
-                maxlength="<?php echo esc_attr($max_size); ?>"
+                maxlength="<?php echo esc_attr($secureshare_max_size); ?>"
                 required
             ></textarea>
             <div class="secureshare-char-counter">
-                <span id="secureshare-char-count">0</span> / <?php echo esc_html($max_size); ?> <?php esc_html_e('characters', 'secureshare'); ?>
+                <span id="secureshare-char-count">0</span> / <?php echo esc_html($secureshare_max_size); ?> <?php esc_html_e('characters', 'secureshare'); ?>
             </div>
         </div>
 
@@ -51,10 +51,10 @@ $expiration_hours = round($data['expiration_time'] / 3600);
             <ul>
                 <li><?php esc_html_e('AES-256-CBC encryption', 'secureshare'); ?></li>
                 <li><?php
-                /* translators: %d: number of hours until secret expires */
                 printf(
+                    /* translators: %d: number of hours until secret expires */
                     esc_html__('Automatically expires in %d hours', 'secureshare'),
-                    $expiration_hours
+                    (int) $secureshare_expiration_hours
                 ); ?></li>
                 <li><?php esc_html_e('Unique encrypted link generated', 'secureshare'); ?></li>
                 <li><?php esc_html_e('No permanent storage', 'secureshare'); ?></li>

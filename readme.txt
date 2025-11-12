@@ -2,9 +2,9 @@
 Contributors: fatlabwebsupport
 Tags: security, password, secret, encryption, sharing
 Requires at least: 6.0
-Tested up to: 6.4
+Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -453,6 +453,18 @@ For a complete list of classes, view the plugin's CSS file at:
 5. Admin settings - Statistics dashboard
 
 == Changelog ==
+
+= 1.0.7 - 2025-11-12 =
+* Fix: WordPress.org Plugin Check compliance - all critical errors resolved
+* Fix: Global variable prefixes added to all template variables
+* Fix: Changed date() to gmdate() for timezone-safe operations
+* Fix: Changed wp_redirect() to wp_safe_redirect() for security
+* Fix: Improved output escaping and input sanitization
+* Fix: Fixed unordered placeholders in translations (i18n compliance)
+* Fix: Added translator comments for all strings with placeholders
+* Fix: Removed deprecated load_plugin_textdomain() function
+* Fix: Updated "Tested up to" WordPress version to 6.8
+* Improvement: Created languages directory for translation files
 
 = 1.0.6 - 2025-11-12 =
 * Fix: Add translator comments for all translatable strings with placeholders

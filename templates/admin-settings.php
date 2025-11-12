@@ -12,19 +12,19 @@ if (!defined('WPINC')) {
 
 // Display success/error messages
 if (isset($_GET['message'])) {
-    $message = sanitize_text_field($_GET['message']);
-    switch ($message) {
+    $secureshare_message = sanitize_text_field(wp_unslash($_GET['message']));
+    switch ($secureshare_message) {
         case 'key_generated':
             echo '<div class="notice notice-success is-dismissible"><p>' .
                  esc_html__('Encryption key regenerated successfully. All previous secrets are now unrecoverable.', 'secureshare') .
                  '</p></div>';
             break;
         case 'cleanup_done':
-            $secrets = isset($_GET['secrets_deleted']) ? intval($_GET['secrets_deleted']) : 0;
-            $rate_limits = isset($_GET['rate_limits_deleted']) ? intval($_GET['rate_limits_deleted']) : 0;
+            $secureshare_secrets = isset($_GET['secrets_deleted']) ? intval($_GET['secrets_deleted']) : 0;
+            $secureshare_rate_limits = isset($_GET['rate_limits_deleted']) ? intval($_GET['rate_limits_deleted']) : 0;
             echo '<div class="notice notice-success is-dismissible"><p>' .
                  /* translators: 1: number of expired secrets, 2: number of rate limit records */
-                 sprintf(esc_html__('Cleanup completed: %d expired secrets and %d old rate limit records removed.', 'secureshare'), $secrets, $rate_limits) .
+                 sprintf(esc_html__('Cleanup completed: %1$d expired secrets and %2$d old rate limit records removed.', 'secureshare'), (int) $secureshare_secrets, (int) $secureshare_rate_limits) .
                  '</p></div>';
             break;
         case 'rate_limits_cleared':
@@ -92,11 +92,11 @@ settings_errors();
                     </th>
                     <td>
                         <?php
-                        $expiration_seconds = get_option('secureshare_expiration_time', 86400);
-                        $expiration_hours = round($expiration_seconds / 3600);
+                        $secureshare_expiration_seconds = get_option('secureshare_expiration_time', 86400);
+                        $secureshare_expiration_hours = round($secureshare_expiration_seconds / 3600);
                         ?>
                         <input type="number" id="secureshare_expiration_time" name="secureshare_expiration_time"
-                               value="<?php echo esc_attr($expiration_hours); ?>"
+                               value="<?php echo esc_attr($secureshare_expiration_hours); ?>"
                                min="1" step="1" class="small-text" />
                         <?php esc_html_e('hours', 'secureshare'); ?>
                         <p class="description">
@@ -171,11 +171,11 @@ settings_errors();
                     </th>
                     <td>
                         <?php
-                        $window_seconds = get_option('secureshare_rate_limit_window', 3600);
-                        $window_hours = round($window_seconds / 3600);
+                        $secureshare_window_seconds = get_option('secureshare_rate_limit_window', 3600);
+                        $secureshare_window_hours = round($secureshare_window_seconds / 3600);
                         ?>
                         <input type="number" id="secureshare_rate_limit_window" name="secureshare_rate_limit_window"
-                               value="<?php echo esc_attr($window_hours); ?>"
+                               value="<?php echo esc_attr($secureshare_window_hours); ?>"
                                min="1" step="1" class="small-text" />
                         <?php esc_html_e('hours', 'secureshare'); ?>
                         <p class="description">
@@ -193,8 +193,8 @@ settings_errors();
 
         <h2><?php esc_html_e('Current Rate Limits', 'secureshare'); ?></h2>
         <?php
-        $rate_limits = SecureShare_Admin::get_rate_limit_records();
-        if (!empty($rate_limits)):
+        $secureshare_rate_limits = SecureShare_Admin::get_rate_limit_records();
+        if (!empty($secureshare_rate_limits)):
         ?>
             <table class="wp-list-table widefat fixed striped">
                 <thead>
@@ -205,11 +205,11 @@ settings_errors();
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($rate_limits as $record): ?>
+                    <?php foreach ($secureshare_rate_limits as $secureshare_record): ?>
                         <tr>
-                            <td><code><?php echo esc_html(substr($record['ip_hash'], 0, 16)) . '...'; ?></code></td>
-                            <td><?php echo esc_html($record['request_count']); ?></td>
-                            <td><?php echo esc_html($record['window_start']); ?></td>
+                            <td><code><?php echo esc_html(substr($secureshare_record['ip_hash'], 0, 16)) . '...'; ?></code></td>
+                            <td><?php echo esc_html($secureshare_record['request_count']); ?></td>
+                            <td><?php echo esc_html($secureshare_record['window_start']); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -262,8 +262,8 @@ settings_errors();
                             <br>
                             <strong><?php esc_html_e('Documentation:', 'secureshare'); ?></strong>
                             <?php
-                            /* translators: %s: section name "CSS Customization Guide" */
                             printf(
+                                /* translators: %s: section name "CSS Customization Guide" */
                                 esc_html__('See the %s section in readme.txt for comprehensive CSS customization examples, including brand colors, dark mode, typography, layouts, and more.', 'secureshare'),
                                 '<strong>CSS Customization Guide</strong>'
                             );
@@ -282,12 +282,12 @@ settings_errors();
         <p><?php esc_html_e('Manually trigger cleanup of expired secrets and old rate limit records. This runs automatically every hour via WP-Cron.', 'secureshare'); ?></p>
 
         <?php
-        $last_cleanup = get_option('secureshare_last_cleanup', 0);
-        if ($last_cleanup > 0) {
-            $time_ago = human_time_diff($last_cleanup, current_time('timestamp'));
+        $secureshare_last_cleanup = get_option('secureshare_last_cleanup', 0);
+        if ($secureshare_last_cleanup > 0) {
+            $secureshare_time_ago = human_time_diff($secureshare_last_cleanup, current_time('timestamp'));
             echo '<p><strong>' . esc_html__('Last cleanup:', 'secureshare') . '</strong> ' .
                  /* translators: %s: human-readable time difference (e.g., "2 hours") */
-                 sprintf(esc_html__('%s ago', 'secureshare'), $time_ago) . '</p>';
+                 sprintf(esc_html__('%s ago', 'secureshare'), esc_html($secureshare_time_ago)) . '</p>';
         }
         ?>
 
@@ -302,7 +302,7 @@ settings_errors();
     <?php elseif ($active_tab === 'statistics'): ?>
         <!-- Statistics Tab -->
         <?php
-        $stats = SecureShare_Admin::get_statistics();
+        $secureshare_stats = SecureShare_Admin::get_statistics();
         ?>
 
         <h2><?php esc_html_e('Plugin Statistics', 'secureshare'); ?></h2>
@@ -311,28 +311,28 @@ settings_errors();
             <tbody>
                 <tr>
                     <th style="width: 300px;"><?php esc_html_e('Total Secrets in Database', 'secureshare'); ?></th>
-                    <td><strong><?php echo esc_html(number_format_i18n($stats['total_secrets'])); ?></strong></td>
+                    <td><strong><?php echo esc_html(number_format_i18n($secureshare_stats['total_secrets'])); ?></strong></td>
                 </tr>
                 <tr>
                     <th><?php esc_html_e('Active Secrets (Not Expired)', 'secureshare'); ?></th>
-                    <td><strong><?php echo esc_html(number_format_i18n($stats['active_secrets'])); ?></strong></td>
+                    <td><strong><?php echo esc_html(number_format_i18n($secureshare_stats['active_secrets'])); ?></strong></td>
                 </tr>
                 <tr>
                     <th><?php esc_html_e('Expired Secrets (Ready for Cleanup)', 'secureshare'); ?></th>
-                    <td><strong><?php echo esc_html(number_format_i18n($stats['expired_secrets'])); ?></strong></td>
+                    <td><strong><?php echo esc_html(number_format_i18n($secureshare_stats['expired_secrets'])); ?></strong></td>
                 </tr>
                 <tr>
                     <th><?php esc_html_e('Rate Limit Records (Last 7 Days)', 'secureshare'); ?></th>
-                    <td><strong><?php echo esc_html(number_format_i18n($stats['rate_limit_records'])); ?></strong></td>
+                    <td><strong><?php echo esc_html(number_format_i18n($secureshare_stats['rate_limit_records'])); ?></strong></td>
                 </tr>
                 <tr>
                     <th><?php esc_html_e('Last Cleanup', 'secureshare'); ?></th>
                     <td>
                         <?php
-                        if ($stats['last_cleanup'] > 0) {
-                            $time_ago = human_time_diff($stats['last_cleanup'], current_time('timestamp'));
+                        if ($secureshare_stats['last_cleanup'] > 0) {
+                            $secureshare_time_ago = human_time_diff($secureshare_stats['last_cleanup'], current_time('timestamp'));
                             /* translators: %s: human-readable time difference (e.g., "2 hours") */
-                            echo sprintf(esc_html__('%s ago', 'secureshare'), $time_ago);
+                            echo sprintf(esc_html__('%s ago', 'secureshare'), esc_html($secureshare_time_ago));
                         } else {
                             esc_html_e('Never', 'secureshare');
                         }
@@ -359,13 +359,13 @@ settings_errors();
                     <td>
                         <?php
                         if (get_option('secureshare_rate_limit_enabled', '1') === '1') {
-                            $max = get_option('secureshare_rate_limit_max', 5);
-                            $window = get_option('secureshare_rate_limit_window', 3600);
-                            /* translators: 1: number of secrets allowed, 2: time period (e.g., "1 hour") */
+                            $secureshare_max = get_option('secureshare_rate_limit_max', 5);
+                            $secureshare_window = get_option('secureshare_rate_limit_window', 3600);
                             echo sprintf(
-                                esc_html__('Enabled: %d secrets per %s', 'secureshare'),
-                                $max,
-                                SecureShare_Admin::format_duration($window)
+                                /* translators: 1: number of secrets allowed, 2: time period (e.g., "1 hour") */
+                                esc_html__('Enabled: %1$d secrets per %2$s', 'secureshare'),
+                                (int) $secureshare_max,
+                                esc_html(SecureShare_Admin::format_duration($secureshare_window))
                             );
                         } else {
                             esc_html_e('Disabled', 'secureshare');

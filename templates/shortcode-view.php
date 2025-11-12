@@ -13,9 +13,9 @@ if (!defined('WPINC')) {
     die;
 }
 
-$secret = $data['secret'];
-$expires_at = strtotime($data['expires_at']);
-$time_remaining = $expires_at - current_time('timestamp');
+$secureshare_secret = $data['secret'];
+$secureshare_expires_at = strtotime($data['expires_at']);
+$secureshare_time_remaining = $secureshare_expires_at - current_time('timestamp');
 ?>
 
 <div class="secureshare-container">
@@ -31,38 +31,38 @@ $time_remaining = $expires_at - current_time('timestamp');
 
     <div class="secureshare-secret-box">
         <label><?php esc_html_e('Your Secret:', 'secureshare'); ?></label>
-        <div class="secureshare-secret-content"><?php echo esc_html($secret); ?></div>
+        <div class="secureshare-secret-content"><?php echo esc_html($secureshare_secret); ?></div>
         <button type="button" id="secureshare-copy-secret" class="secureshare-button secureshare-button-secondary">
             <?php esc_html_e('Copy Secret', 'secureshare'); ?>
         </button>
     </div>
 
     <div class="secureshare-expiry-info">
-        <?php if ($time_remaining > 0): ?>
+        <?php if ($secureshare_time_remaining > 0): ?>
             <p>
                 <strong><?php esc_html_e('Expires in:', 'secureshare'); ?></strong>
                 <?php
-                $hours = floor($time_remaining / 3600);
-                $minutes = floor(($time_remaining % 3600) / 60);
+                $secureshare_hours = floor($secureshare_time_remaining / 3600);
+                $secureshare_minutes = floor(($secureshare_time_remaining % 3600) / 60);
 
-                if ($hours > 0) {
-                    /* translators: 1: number of hours, 2: number of minutes */
+                if ($secureshare_hours > 0) {
                     printf(
-                        esc_html__('%d hours, %d minutes', 'secureshare'),
-                        $hours,
-                        $minutes
+                        /* translators: 1: number of hours, 2: number of minutes */
+                        esc_html__('%1$d hours, %2$d minutes', 'secureshare'),
+                        (int) $secureshare_hours,
+                        (int) $secureshare_minutes
                     );
                 } else {
-                    /* translators: %d: number of minutes */
                     printf(
+                        /* translators: %d: number of minutes */
                         esc_html__('%d minutes', 'secureshare'),
-                        $minutes
+                        (int) $secureshare_minutes
                     );
                 }
                 ?>
             </p>
             <p class="secureshare-expiry-time">
-                <?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $expires_at)); ?>
+                <?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $secureshare_expires_at)); ?>
             </p>
         <?php else: ?>
             <p class="secureshare-expired">
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var copyBtn = document.getElementById('secureshare-copy-secret');
     if (copyBtn) {
         copyBtn.addEventListener('click', function() {
-            var secret = '<?php echo esc_js($secret); ?>';
+            var secret = '<?php echo esc_js($secureshare_secret); ?>';
 
             // Try modern clipboard API first
             if (navigator.clipboard && navigator.clipboard.writeText) {

@@ -187,12 +187,12 @@ class SecureShare_Shortcodes {
     private function get_token_from_request() {
         // Check standard token parameter
         if (isset($_GET['token'])) {
-            return sanitize_text_field($_GET['token']);
+            return sanitize_text_field(wp_unslash($_GET['token']));
         }
 
         // Check secureshare_token parameter (fallback)
         if (isset($_GET['secureshare_token'])) {
-            return sanitize_text_field($_GET['secureshare_token']);
+            return sanitize_text_field(wp_unslash($_GET['secureshare_token']));
         }
 
         return null;

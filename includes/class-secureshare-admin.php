@@ -125,11 +125,11 @@ class SecureShare_Admin {
      */
     public function render_admin_page() {
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to access this page.', 'secureshare'));
+            wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'secureshare'));
         }
 
         // Get current tab
-        $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'general';
+        $active_tab = isset($_GET['tab']) ? sanitize_text_field(wp_unslash($_GET['tab'])) : 'general';
 
         // Load template
         include SECURESHARE_PLUGIN_DIR . 'templates/admin-settings.php';
@@ -141,9 +141,9 @@ class SecureShare_Admin {
     public function handle_generate_key() {
         // Verify nonce and capabilities
         if (!isset($_POST['secureshare_nonce']) ||
-            !wp_verify_nonce($_POST['secureshare_nonce'], 'secureshare_generate_key') ||
+            !wp_verify_nonce(wp_unslash($_POST['secureshare_nonce']), 'secureshare_generate_key') ||
             !current_user_can('manage_options')) {
-            wp_die(__('Security check failed', 'secureshare'));
+            wp_die(esc_html__('Security check failed', 'secureshare'));
         }
 
         // Generate new key
@@ -151,7 +151,7 @@ class SecureShare_Admin {
         update_option('secureshare_encryption_key', $new_key);
 
         // Redirect back with success message
-        wp_redirect(add_query_arg(array(
+        wp_safe_redirect(add_query_arg(array(
             'page' => 'secureshare',
             'tab' => 'general',
             'message' => 'key_generated'
@@ -165,16 +165,16 @@ class SecureShare_Admin {
     public function handle_manual_cleanup() {
         // Verify nonce and capabilities
         if (!isset($_POST['secureshare_nonce']) ||
-            !wp_verify_nonce($_POST['secureshare_nonce'], 'secureshare_manual_cleanup') ||
+            !wp_verify_nonce(wp_unslash($_POST['secureshare_nonce']), 'secureshare_manual_cleanup') ||
             !current_user_can('manage_options')) {
-            wp_die(__('Security check failed', 'secureshare'));
+            wp_die(esc_html__('Security check failed', 'secureshare'));
         }
 
         // Run cleanup
         $result = SecureShare_Cron::manual_cleanup();
 
         // Redirect back with success message
-        wp_redirect(add_query_arg(array(
+        wp_safe_redirect(add_query_arg(array(
             'page' => 'secureshare',
             'tab' => 'advanced',
             'message' => 'cleanup_done',
@@ -190,16 +190,16 @@ class SecureShare_Admin {
     public function handle_clear_rate_limits() {
         // Verify nonce and capabilities
         if (!isset($_POST['secureshare_nonce']) ||
-            !wp_verify_nonce($_POST['secureshare_nonce'], 'secureshare_clear_rate_limits') ||
+            !wp_verify_nonce(wp_unslash($_POST['secureshare_nonce']), 'secureshare_clear_rate_limits') ||
             !current_user_can('manage_options')) {
-            wp_die(__('Security check failed', 'secureshare'));
+            wp_die(esc_html__('Security check failed', 'secureshare'));
         }
 
         // Clear rate limits
         SecureShare_DB::clear_all_rate_limits();
 
         // Redirect back with success message
-        wp_redirect(add_query_arg(array(
+        wp_safe_redirect(add_query_arg(array(
             'page' => 'secureshare',
             'tab' => 'rate_limiting',
             'message' => 'rate_limits_cleared'

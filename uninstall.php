@@ -18,7 +18,7 @@ global $wpdb;
 /**
  * Remove all plugin options.
  */
-$options = array(
+$secureshare_options = array(
     'secureshare_encryption_key',
     'secureshare_expiration_time',
     'secureshare_max_secret_size',
@@ -31,25 +31,25 @@ $options = array(
     'secureshare_version'
 );
 
-foreach ($options as $option) {
-    delete_option($option);
+foreach ($secureshare_options as $secureshare_option) {
+    delete_option($secureshare_option);
 }
 
 /**
  * Drop plugin database tables.
  */
-$secrets_table = $wpdb->prefix . 'secureshare_secrets';
-$rate_limits_table = $wpdb->prefix . 'secureshare_rate_limits';
+$secureshare_secrets_table = $wpdb->prefix . 'secureshare_secrets';
+$secureshare_rate_limits_table = $wpdb->prefix . 'secureshare_rate_limits';
 
-$wpdb->query("DROP TABLE IF EXISTS $secrets_table");
-$wpdb->query("DROP TABLE IF EXISTS $rate_limits_table");
+$wpdb->query("DROP TABLE IF EXISTS $secureshare_secrets_table");
+$wpdb->query("DROP TABLE IF EXISTS $secureshare_rate_limits_table");
 
 /**
  * Unschedule cron jobs.
  */
-$timestamp = wp_next_scheduled('secureshare_cleanup_expired');
-if ($timestamp) {
-    wp_unschedule_event($timestamp, 'secureshare_cleanup_expired');
+$secureshare_timestamp = wp_next_scheduled('secureshare_cleanup_expired');
+if ($secureshare_timestamp) {
+    wp_unschedule_event($secureshare_timestamp, 'secureshare_cleanup_expired');
 }
 
 /**
