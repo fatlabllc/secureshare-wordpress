@@ -1,204 +1,183 @@
 /**
- * SecureShare - Client-side JavaScript for WordPress
- *
- * Handles form submission, character counting, and clipboard operations.
+ * SecureShare Frontend JavaScript
+ * Handles secret creation form submission and copy-to-clipboard functionality
  */
 
 (function() {
     'use strict';
 
+    // Wait for DOM to be ready
     document.addEventListener('DOMContentLoaded', function() {
-        // Character counter for create form
-        const secretInput = document.getElementById('secureshare-secret');
+
+        // Character counter
+        const secretTextarea = document.getElementById('secureshare-secret');
         const charCount = document.getElementById('secureshare-char-count');
 
-        if (secretInput && charCount) {
-            secretInput.addEventListener('input', function() {
-                charCount.textContent = this.value.length.toLocaleString();
+        if (secretTextarea && charCount) {
+            secretTextarea.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
             });
         }
 
-        // Form submission for creating secrets
-        const secretForm = document.getElementById('secureshare-form');
-        if (secretForm) {
-            secretForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
+        // Form submission
+        const form = document.getElementById('secureshare-form');
+        if (!form) return;
 
-                const messageDiv = document.getElementById('secureshare-message');
-                const resultDiv = document.getElementById('secureshare-result');
-                const submitBtn = this.querySelector('button[type="submit"]');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
 
-                // Reset display
-                messageDiv.style.display = 'none';
-                resultDiv.style.display = 'none';
+            const secret = secretTextarea.value.trim();
+            const submitButton = form.querySelector('button[type="submit"]');
+            const messageDiv = document.getElementById('secureshare-message');
+            const resultDiv = document.getElementById('secureshare-result');
 
-                // Disable button and show loading
-                submitBtn.disabled = true;
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = secureshareData.strings.creating || 'Creating...';
+            // Validate
+            if (!secret) {
+                showMessage(messageDiv, secureshareData.strings.error + ': Secret cannot be empty', 'error');
+                return;
+            }
 
-                try {
-                    // Prepare request data
-                    const formData = new FormData();
-                    formData.append('secret', secretInput.value);
-                    formData.append('nonce', secureshareData.nonce);
+            if (secret.length > secureshareData.maxSecretSize) {
+                showMessage(messageDiv, secureshareData.strings.error + ': Secret is too long', 'error');
+                return;
+            }
 
-                    // Send request to REST API
-                    const response = await fetch(secureshareData.restUrl + 'create', {
-                        method: 'POST',
-                        body: formData,
-                        credentials: 'same-origin'
-                    });
+            // Disable submit button
+            submitButton.disabled = true;
+            submitButton.textContent = secureshareData.strings.creating;
 
-                    const data = await response.json();
+            // Send to REST API
+            fetch(secureshareData.restUrl + 'create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    secret: secret,
+                    nonce: secureshareData.nonce
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.url) {
+                    // Show success result
+                    form.style.display = 'none';
+                    messageDiv.style.display = 'none';
+                    resultDiv.style.display = 'block';
 
-                    if (response.ok && data.success) {
-                        // Show success result
-                        document.getElementById('secureshare-url').value = data.url;
-                        resultDiv.style.display = 'block';
+                    // Set the URL
+                    const urlInput = document.getElementById('secureshare-url');
+                    urlInput.value = data.url;
 
-                        // Clear the form
-                        secretInput.value = '';
+                    // Setup copy button
+                    setupCopyButton();
+
+                    // Setup "create another" button
+                    const createAnotherBtn = document.getElementById('secureshare-create-another');
+                    createAnotherBtn.addEventListener('click', function() {
+                        form.style.display = 'block';
+                        resultDiv.style.display = 'none';
+                        secretTextarea.value = '';
                         charCount.textContent = '0';
-
-                        // Hide the form
-                        secretForm.style.display = 'none';
-
-                        // Scroll to result
-                        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    } else {
-                        // Show error
-                        showMessage(messageDiv, data.message || 'An error occurred', 'error');
-                    }
-                } catch (error) {
-                    // Network or parsing error
-                    showMessage(messageDiv, 'Failed to create secret. Please try again.', 'error');
-                    console.error('SecureShare Error:', error);
-                } finally {
-                    // Re-enable button
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalText;
+                        submitButton.disabled = false;
+                        submitButton.textContent = submitButton.getAttribute('data-original-text') || 'Create Secure Link';
+                    });
+                } else {
+                    // Show error
+                    const errorMessage = data.message || 'Failed to create secure link';
+                    showMessage(messageDiv, secureshareData.strings.error + ': ' + errorMessage, 'error');
+                    submitButton.disabled = false;
+                    submitButton.textContent = submitButton.getAttribute('data-original-text') || 'Create Secure Link';
                 }
+            })
+            .catch(error => {
+                console.error('SecureShare error:', error);
+                showMessage(messageDiv, secureshareData.strings.error + ': ' + error.message, 'error');
+                submitButton.disabled = false;
+                submitButton.textContent = submitButton.getAttribute('data-original-text') || 'Create Secure Link';
             });
-        }
+        });
 
-        // Copy URL to clipboard
-        const copyBtn = document.getElementById('secureshare-copy-btn');
-        if (copyBtn) {
-            copyBtn.addEventListener('click', function() {
-                const urlInput = document.getElementById('secureshare-url');
-                copyToClipboard(urlInput.value, this);
-            });
-        }
-
-        // Create another secret button
-        const createAnotherBtn = document.getElementById('secureshare-create-another');
-        if (createAnotherBtn) {
-            createAnotherBtn.addEventListener('click', function() {
-                const form = document.getElementById('secureshare-form');
-                const result = document.getElementById('secureshare-result');
-
-                if (form && result) {
-                    result.style.display = 'none';
-                    form.style.display = 'block';
-                    secretInput.focus();
-                }
-            });
-        }
-
-        // Auto-select URL on focus
-        const urlInput = document.getElementById('secureshare-url');
-        if (urlInput) {
-            urlInput.addEventListener('focus', function() {
-                this.select();
-            });
+        // Store original button text
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) {
+            submitButton.setAttribute('data-original-text', submitButton.textContent);
         }
     });
 
     /**
-     * Show a message to the user.
-     *
-     * @param {HTMLElement} messageDiv The message container element.
-     * @param {string} text The message text.
-     * @param {string} type The message type ('success' or 'error').
+     * Setup copy button functionality
      */
-    function showMessage(messageDiv, text, type) {
-        messageDiv.textContent = text;
-        messageDiv.className = 'secureshare-message secureshare-' + type;
-        messageDiv.style.display = 'block';
-        messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    function setupCopyButton() {
+        const copyBtn = document.getElementById('secureshare-copy-btn');
+        const urlInput = document.getElementById('secureshare-url');
 
-    /**
-     * Copy text to clipboard with modern API and fallback.
-     *
-     * @param {string} text The text to copy.
-     * @param {HTMLElement} button The button element to update.
-     */
-    function copyToClipboard(text, button) {
-        // Try modern clipboard API first
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(function() {
-                showCopySuccess(button);
-            }).catch(function(err) {
-                console.error('Clipboard API failed:', err);
-                fallbackCopy(text, button);
-            });
-        } else {
-            fallbackCopy(text, button);
-        }
-    }
+        if (!copyBtn || !urlInput) return;
 
-    /**
-     * Fallback copy method for older browsers.
-     *
-     * @param {string} text The text to copy.
-     * @param {HTMLElement} button The button element to update.
-     */
-    function fallbackCopy(text, button) {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.top = '0';
-        textArea.style.left = '0';
-        textArea.style.width = '1px';
-        textArea.style.height = '1px';
-        textArea.style.opacity = '0';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
+        copyBtn.addEventListener('click', function() {
+            urlInput.select();
+            urlInput.setSelectionRange(0, 99999); // For mobile devices
 
-        try {
-            const successful = document.execCommand('copy');
-            if (successful) {
-                showCopySuccess(button);
+            // Try modern clipboard API first
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(urlInput.value)
+                    .then(function() {
+                        showCopySuccess(copyBtn);
+                    })
+                    .catch(function(err) {
+                        console.error('Copy failed:', err);
+                        // Fallback to execCommand
+                        fallbackCopy(urlInput, copyBtn);
+                    });
             } else {
-                alert(secureshareData.strings.copyError || 'Failed to copy');
+                // Fallback for older browsers
+                fallbackCopy(urlInput, copyBtn);
             }
-        } catch (err) {
-            alert(secureshareData.strings.copyError || 'Failed to copy');
-            console.error('Fallback copy failed:', err);
-        }
-
-        document.body.removeChild(textArea);
+        });
     }
 
     /**
-     * Show copy success feedback on button.
-     *
-     * @param {HTMLElement} button The button element to update.
+     * Fallback copy method for older browsers
+     */
+    function fallbackCopy(input, button) {
+        try {
+            document.execCommand('copy');
+            showCopySuccess(button);
+        } catch (err) {
+            alert(secureshareData.strings.copyError);
+        }
+    }
+
+    /**
+     * Show copy success feedback
      */
     function showCopySuccess(button) {
         const originalText = button.textContent;
-        const originalClass = button.className;
-
-        button.textContent = secureshareData.strings.copySuccess || 'Copied!';
-        button.className = button.className.replace('secureshare-button-secondary', 'secureshare-button-success');
+        button.textContent = secureshareData.strings.copySuccess;
+        button.classList.add('secureshare-button-success');
 
         setTimeout(function() {
             button.textContent = originalText;
-            button.className = originalClass;
+            button.classList.remove('secureshare-button-success');
         }, 2000);
+    }
+
+    /**
+     * Show message in message div
+     */
+    function showMessage(messageDiv, text, type) {
+        if (!messageDiv) return;
+
+        messageDiv.textContent = text;
+        messageDiv.className = 'secureshare-message secureshare-' + type;
+        messageDiv.style.display = 'block';
+
+        // Auto-hide after 5 seconds for success messages
+        if (type === 'success') {
+            setTimeout(function() {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
     }
 
 })();

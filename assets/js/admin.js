@@ -1,22 +1,22 @@
 /**
- * SecureShare - Admin JavaScript
- *
- * Handles admin panel interactions and confirmations.
+ * SecureShare Admin JavaScript
+ * Handles admin panel functionality
  */
 
 (function($) {
     'use strict';
 
     $(document).ready(function() {
-        // Confirm and submit encryption key regeneration
+
+        // Regenerate encryption key button
         $('#secureshare-regenerate-key-btn').on('click', function(e) {
             e.preventDefault();
 
             if (!confirm(secureshareAdmin.strings.confirmKeyRegen)) {
-                return false;
+                return;
             }
 
-            // Create a hidden form and submit it
+            // Create form and submit
             var form = $('<form>', {
                 'method': 'POST',
                 'action': secureshareAdmin.adminPostUrl
@@ -38,31 +38,82 @@
             form.submit();
         });
 
-        // Confirm rate limits clearing
-        $('#secureshare-clear-rate-limits').on('click', function(e) {
+        // Manual cleanup button
+        $('#secureshare-manual-cleanup-btn').on('click', function(e) {
+            e.preventDefault();
+
+            if (!confirm('Are you sure you want to manually trigger cleanup of expired secrets?')) {
+                return;
+            }
+
+            var form = $('<form>', {
+                'method': 'POST',
+                'action': secureshareAdmin.adminPostUrl
+            });
+
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': 'action',
+                'value': 'secureshare_manual_cleanup'
+            }));
+
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': 'secureshare_nonce',
+                'value': wp.ajax.settings.nonce
+            }));
+
+            $('body').append(form);
+            form.submit();
+        });
+
+        // Clear rate limits button
+        $('#secureshare-clear-rate-limits-btn').on('click', function(e) {
+            e.preventDefault();
+
             if (!confirm(secureshareAdmin.strings.confirmClearRateLimits)) {
-                e.preventDefault();
-                return false;
+                return;
+            }
+
+            var form = $('<form>', {
+                'method': 'POST',
+                'action': secureshareAdmin.adminPostUrl
+            });
+
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': 'action',
+                'value': 'secureshare_clear_rate_limits'
+            }));
+
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': 'secureshare_nonce',
+                'value': wp.ajax.settings.nonce
+            }));
+
+            $('body').append(form);
+            form.submit();
+        });
+
+        // Copy encryption key to clipboard
+        $('#secureshare_encryption_key').on('click', function() {
+            this.select();
+            this.setSelectionRange(0, 99999);
+
+            try {
+                document.execCommand('copy');
+                // Show temporary feedback
+                var originalBg = $(this).css('background-color');
+                $(this).css('background-color', '#d4edda');
+                setTimeout(function() {
+                    $('#secureshare_encryption_key').css('background-color', originalBg);
+                }, 500);
+            } catch (err) {
+                console.error('Copy failed:', err);
             }
         });
 
-        // Copy encryption key to clipboard (if button exists)
-        $(document).on('click', '#secureshare_encryption_key', function() {
-            this.select();
-            try {
-                document.execCommand('copy');
-                // Optional: Show a quick notification
-                $(this).after('<span class="secureshare-copied-notice">' +
-                    secureshareAdmin.strings.keyCopied + '</span>');
-                setTimeout(function() {
-                    $('.secureshare-copied-notice').fadeOut(function() {
-                        $(this).remove();
-                    });
-                }, 2000);
-            } catch (err) {
-                // Silent fail - user can still manually copy
-            }
-        });
     });
 
 })(jQuery);
