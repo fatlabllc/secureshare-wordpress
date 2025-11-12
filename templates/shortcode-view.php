@@ -46,12 +46,14 @@ $time_remaining = $expires_at - current_time('timestamp');
                 $minutes = floor(($time_remaining % 3600) / 60);
 
                 if ($hours > 0) {
+                    /* translators: 1: number of hours, 2: number of minutes */
                     printf(
                         esc_html__('%d hours, %d minutes', 'secureshare'),
                         $hours,
                         $minutes
                     );
                 } else {
+                    /* translators: %d: number of minutes */
                     printf(
                         esc_html__('%d minutes', 'secureshare'),
                         $minutes

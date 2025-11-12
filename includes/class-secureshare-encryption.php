@@ -61,6 +61,7 @@ class SecureShare_Encryption {
 
         if ($encrypted === false) {
             $error_msg = openssl_error_string();
+            /* translators: %s: OpenSSL error message */
             return new WP_Error('encryption_failed', sprintf(__('Encryption failed: %s', 'secureshare'), $error_msg));
         }
 

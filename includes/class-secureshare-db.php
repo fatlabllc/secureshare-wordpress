@@ -170,6 +170,7 @@ class SecureShare_DB {
                     return new WP_Error(
                         'rate_limit_exceeded',
                         sprintf(
+                            /* translators: %d: number of minutes until rate limit resets */
                             __('Rate limit exceeded. Please try again in %d minutes.', 'secureshare'),
                             ceil($time_remaining / 60)
                         )
@@ -309,6 +310,7 @@ class SecureShare_DB {
             return new WP_Error(
                 'secret_too_large',
                 sprintf(
+                    /* translators: %d: maximum number of characters allowed */
                     __('Secret exceeds maximum size of %d characters', 'secureshare'),
                     $max_size
                 )

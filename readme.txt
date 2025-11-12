@@ -4,7 +4,7 @@ Tags: security, password, secret, encryption, sharing
 Requires at least: 6.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -453,6 +453,11 @@ For a complete list of classes, view the plugin's CSS file at:
 5. Admin settings - Statistics dashboard
 
 == Changelog ==
+
+= 1.0.6 - 2025-11-12 =
+* Fix: Add translator comments for all translatable strings with placeholders
+* Compliance: WordPress.org Plugin Check requirements for internationalization
+* Add /* translators: */ comments to clarify placeholder meanings for translators
 
 = 1.0.5 - 2025-11-12 =
 * Fix: Textarea width alignment - now matches button and info box width

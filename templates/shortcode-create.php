@@ -19,7 +19,9 @@ $expiration_hours = round($data['expiration_time'] / 3600);
     <div class="secureshare-header">
         <h2><?php esc_html_e('Share a Secret Securely', 'secureshare'); ?></h2>
         <p class="secureshare-description">
-            <?php printf(
+            <?php
+            /* translators: %d: number of hours until link expires */
+            printf(
                 esc_html__('Create an encrypted link that expires in %d hours. Perfect for sharing passwords, API keys, or other sensitive information.', 'secureshare'),
                 $expiration_hours
             ); ?>
@@ -48,7 +50,9 @@ $expiration_hours = round($data['expiration_time'] / 3600);
             <strong><?php esc_html_e('Security Features:', 'secureshare'); ?></strong>
             <ul>
                 <li><?php esc_html_e('AES-256-CBC encryption', 'secureshare'); ?></li>
-                <li><?php printf(
+                <li><?php
+                /* translators: %d: number of hours until secret expires */
+                printf(
                     esc_html__('Automatically expires in %d hours', 'secureshare'),
                     $expiration_hours
                 ); ?></li>

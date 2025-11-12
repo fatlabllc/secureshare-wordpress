@@ -23,6 +23,7 @@ if (isset($_GET['message'])) {
             $secrets = isset($_GET['secrets_deleted']) ? intval($_GET['secrets_deleted']) : 0;
             $rate_limits = isset($_GET['rate_limits_deleted']) ? intval($_GET['rate_limits_deleted']) : 0;
             echo '<div class="notice notice-success is-dismissible"><p>' .
+                 /* translators: 1: number of expired secrets, 2: number of rate limit records */
                  sprintf(esc_html__('Cleanup completed: %d expired secrets and %d old rate limit records removed.', 'secureshare'), $secrets, $rate_limits) .
                  '</p></div>';
             break;
@@ -261,6 +262,7 @@ settings_errors();
                             <br>
                             <strong><?php esc_html_e('Documentation:', 'secureshare'); ?></strong>
                             <?php
+                            /* translators: %s: section name "CSS Customization Guide" */
                             printf(
                                 esc_html__('See the %s section in readme.txt for comprehensive CSS customization examples, including brand colors, dark mode, typography, layouts, and more.', 'secureshare'),
                                 '<strong>CSS Customization Guide</strong>'
@@ -284,6 +286,7 @@ settings_errors();
         if ($last_cleanup > 0) {
             $time_ago = human_time_diff($last_cleanup, current_time('timestamp'));
             echo '<p><strong>' . esc_html__('Last cleanup:', 'secureshare') . '</strong> ' .
+                 /* translators: %s: human-readable time difference (e.g., "2 hours") */
                  sprintf(esc_html__('%s ago', 'secureshare'), $time_ago) . '</p>';
         }
         ?>
@@ -328,6 +331,7 @@ settings_errors();
                         <?php
                         if ($stats['last_cleanup'] > 0) {
                             $time_ago = human_time_diff($stats['last_cleanup'], current_time('timestamp'));
+                            /* translators: %s: human-readable time difference (e.g., "2 hours") */
                             echo sprintf(esc_html__('%s ago', 'secureshare'), $time_ago);
                         } else {
                             esc_html_e('Never', 'secureshare');
@@ -357,6 +361,7 @@ settings_errors();
                         if (get_option('secureshare_rate_limit_enabled', '1') === '1') {
                             $max = get_option('secureshare_rate_limit_max', 5);
                             $window = get_option('secureshare_rate_limit_window', 3600);
+                            /* translators: 1: number of secrets allowed, 2: time period (e.g., "1 hour") */
                             echo sprintf(
                                 esc_html__('Enabled: %d secrets per %s', 'secureshare'),
                                 $max,

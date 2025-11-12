@@ -298,15 +298,19 @@ class SecureShare_Admin {
      */
     public static function format_duration($seconds) {
         if ($seconds < 60) {
+            /* translators: %d: number of seconds */
             return sprintf(_n('%d second', '%d seconds', $seconds, 'secureshare'), $seconds);
         } elseif ($seconds < 3600) {
             $minutes = floor($seconds / 60);
+            /* translators: %d: number of minutes */
             return sprintf(_n('%d minute', '%d minutes', $minutes, 'secureshare'), $minutes);
         } elseif ($seconds < 86400) {
             $hours = floor($seconds / 3600);
+            /* translators: %d: number of hours */
             return sprintf(_n('%d hour', '%d hours', $hours, 'secureshare'), $hours);
         } else {
             $days = floor($seconds / 86400);
+            /* translators: %d: number of days */
             return sprintf(_n('%d day', '%d days', $days, 'secureshare'), $days);
         }
     }
