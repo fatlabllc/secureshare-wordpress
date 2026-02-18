@@ -1,5 +1,5 @@
 /**
- * SecureShare Frontend JavaScript
+ * SecretDrop Frontend JavaScript
  * Handles secret creation form submission and copy-to-clipboard functionality
  */
 
@@ -10,8 +10,8 @@
     document.addEventListener('DOMContentLoaded', function() {
 
         // Character counter
-        const secretTextarea = document.getElementById('secureshare-secret');
-        const charCount = document.getElementById('secureshare-char-count');
+        const secretTextarea = document.getElementById('secretdrop-secret');
+        const charCount = document.getElementById('secretdrop-char-count');
 
         if (secretTextarea && charCount) {
             secretTextarea.addEventListener('input', function() {
@@ -20,7 +20,7 @@
         }
 
         // Form submission
-        const form = document.getElementById('secureshare-form');
+        const form = document.getElementById('secretdrop-form');
         if (!form) return;
 
         form.addEventListener('submit', function(e) {
@@ -28,29 +28,30 @@
 
             const secret = secretTextarea.value.trim();
             const submitButton = form.querySelector('button[type="submit"]');
-            const messageDiv = document.getElementById('secureshare-message');
-            const resultDiv = document.getElementById('secureshare-result');
+            const messageDiv = document.getElementById('secretdrop-message');
+            const resultDiv = document.getElementById('secretdrop-result');
 
             // Validate
             if (!secret) {
-                showMessage(messageDiv, secureshareData.strings.error + ': Secret cannot be empty', 'error');
+                showMessage(messageDiv, secretdropData.strings.error + ': Secret cannot be empty', 'error');
                 return;
             }
 
-            if (secret.length > secureshareData.maxSecretSize) {
-                showMessage(messageDiv, secureshareData.strings.error + ': Secret is too long', 'error');
+            if (secret.length > secretdropData.maxSecretSize) {
+                showMessage(messageDiv, secretdropData.strings.error + ': Secret is too long', 'error');
                 return;
             }
 
             // Disable submit button
             submitButton.disabled = true;
-            submitButton.textContent = secureshareData.strings.creating;
+            submitButton.textContent = secretdropData.strings.creating;
 
             // Send to REST API
-            fetch(secureshareData.restUrl + 'create', {
+            fetch(secretdropData.restUrl + 'create', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': secretdropData.nonce
                 },
                 body: JSON.stringify({
                     secret: secret
@@ -65,14 +66,14 @@
                     resultDiv.style.display = 'block';
 
                     // Set the URL
-                    const urlInput = document.getElementById('secureshare-url');
+                    const urlInput = document.getElementById('secretdrop-url');
                     urlInput.value = data.url;
 
                     // Setup copy button
                     setupCopyButton();
 
                     // Setup "create another" button
-                    const createAnotherBtn = document.getElementById('secureshare-create-another');
+                    const createAnotherBtn = document.getElementById('secretdrop-create-another');
                     createAnotherBtn.addEventListener('click', function() {
                         form.style.display = 'block';
                         resultDiv.style.display = 'none';
@@ -84,14 +85,14 @@
                 } else {
                     // Show error
                     const errorMessage = data.message || 'Failed to create secure link';
-                    showMessage(messageDiv, secureshareData.strings.error + ': ' + errorMessage, 'error');
+                    showMessage(messageDiv, secretdropData.strings.error + ': ' + errorMessage, 'error');
                     submitButton.disabled = false;
                     submitButton.textContent = submitButton.getAttribute('data-original-text') || 'Create Secure Link';
                 }
             })
             .catch(error => {
-                console.error('SecureShare error:', error);
-                showMessage(messageDiv, secureshareData.strings.error + ': ' + error.message, 'error');
+                console.error('SecretDrop error:', error);
+                showMessage(messageDiv, secretdropData.strings.error + ': ' + error.message, 'error');
                 submitButton.disabled = false;
                 submitButton.textContent = submitButton.getAttribute('data-original-text') || 'Create Secure Link';
             });
@@ -108,8 +109,8 @@
      * Setup copy button functionality
      */
     function setupCopyButton() {
-        const copyBtn = document.getElementById('secureshare-copy-btn');
-        const urlInput = document.getElementById('secureshare-url');
+        const copyBtn = document.getElementById('secretdrop-copy-btn');
+        const urlInput = document.getElementById('secretdrop-url');
 
         if (!copyBtn || !urlInput) return;
 
@@ -143,7 +144,7 @@
             document.execCommand('copy');
             showCopySuccess(button);
         } catch (err) {
-            alert(secureshareData.strings.copyError);
+            alert(secretdropData.strings.copyError);
         }
     }
 
@@ -152,12 +153,12 @@
      */
     function showCopySuccess(button) {
         const originalText = button.textContent;
-        button.textContent = secureshareData.strings.copySuccess;
-        button.classList.add('secureshare-button-success');
+        button.textContent = secretdropData.strings.copySuccess;
+        button.classList.add('secretdrop-button-success');
 
         setTimeout(function() {
             button.textContent = originalText;
-            button.classList.remove('secureshare-button-success');
+            button.classList.remove('secretdrop-button-success');
         }, 2000);
     }
 
@@ -168,7 +169,7 @@
         if (!messageDiv) return;
 
         messageDiv.textContent = text;
-        messageDiv.className = 'secureshare-message secureshare-' + type;
+        messageDiv.className = 'secretdrop-message secretdrop-' + type;
         messageDiv.style.display = 'block';
 
         // Auto-hide after 5 seconds for success messages

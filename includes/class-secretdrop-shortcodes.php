@@ -1,6 +1,6 @@
 <?php
 /**
- * Shortcode handlers for SecureShare.
+ * Shortcode handlers for SecretDrop.
  *
  * Registers and handles shortcodes for displaying secret creation
  * and viewing interfaces.
@@ -10,26 +10,26 @@ if (!defined('WPINC')) {
     die;
 }
 
-class SecureShare_Shortcodes {
+class SecretDrop_Shortcodes {
 
     /**
      * Constructor - registers shortcodes.
      */
     public function __construct() {
-        add_shortcode('secureshare', array($this, 'smart_shortcode'));
+        add_shortcode('secretdrop', array($this, 'smart_shortcode'));
 
         // Enqueue assets when shortcode is detected
         add_filter('the_content', array($this, 'detect_shortcodes'), 1);
     }
 
     /**
-     * Detect if SecureShare shortcode is present and enqueue assets.
+     * Detect if SecretDrop shortcode is present and enqueue assets.
      *
      * @param string $content The post content.
      * @return string The unmodified content.
      */
     public function detect_shortcodes($content) {
-        if (has_shortcode($content, 'secureshare')) {
+        if (has_shortcode($content, 'secretdrop')) {
             $this->enqueue_assets();
         }
 
@@ -42,38 +42,38 @@ class SecureShare_Shortcodes {
     private function enqueue_assets() {
         // Enqueue CSS
         wp_enqueue_style(
-            'secureshare-styles',
-            SECURESHARE_PLUGIN_URL . 'assets/css/secureshare.css',
+            'secretdrop-styles',
+            SECRETDROP_PLUGIN_URL . 'assets/css/secretdrop.css',
             array(),
-            SECURESHARE_VERSION
+            SECRETDROP_VERSION
         );
 
         // Enqueue JavaScript
         wp_enqueue_script(
-            'secureshare-script',
-            SECURESHARE_PLUGIN_URL . 'assets/js/secureshare.js',
+            'secretdrop-script',
+            SECRETDROP_PLUGIN_URL . 'assets/js/secretdrop.js',
             array(),
-            SECURESHARE_VERSION,
+            SECRETDROP_VERSION,
             true
         );
 
         // Localize script with REST API data
-        wp_localize_script('secureshare-script', 'secureshareData', array(
-            'restUrl' => rest_url('secureshare/v1/'),
-            'nonce' => wp_create_nonce('secureshare_create'),
-            'maxSecretSize' => intval(get_option('secureshare_max_secret_size', 2000)),
+        wp_localize_script('secretdrop-script', 'secretdropData', array(
+            'restUrl' => rest_url('secretdrop/v1/'),
+            'nonce' => wp_create_nonce('wp_rest'),
+            'maxSecretSize' => intval(get_option('secretdrop_max_secret_size', 2000)),
             'strings' => array(
-                'copySuccess' => __('Copied to clipboard!', 'secureshare'),
-                'copyError' => __('Failed to copy', 'secureshare'),
-                'creating' => __('Creating secure link...', 'secureshare'),
-                'error' => __('Error', 'secureshare')
+                'copySuccess' => __('Copied to clipboard!', 'secretdrop'),
+                'copyError' => __('Failed to copy', 'secretdrop'),
+                'creating' => __('Creating secure link...', 'secretdrop'),
+                'error' => __('Error', 'secretdrop')
             )
         ));
 
         // Add custom CSS if configured
-        $custom_css = get_option('secureshare_custom_css', '');
+        $custom_css = get_option('secretdrop_custom_css', '');
         if (!empty($custom_css)) {
-            wp_add_inline_style('secureshare-styles', $custom_css);
+            wp_add_inline_style('secretdrop-styles', $custom_css);
         }
     }
 
@@ -103,17 +103,17 @@ class SecureShare_Shortcodes {
         ob_start();
 
         $data = array(
-            'max_secret_size' => intval(get_option('secureshare_max_secret_size', 2000)),
-            'expiration_time' => intval(get_option('secureshare_expiration_time', 86400))
+            'max_secret_size' => intval(get_option('secretdrop_max_secret_size', 2000)),
+            'expiration_time' => intval(get_option('secretdrop_expiration_time', 86400))
         );
 
         // Load template
-        $template_path = SECURESHARE_PLUGIN_DIR . 'templates/shortcode-create.php';
+        $template_path = SECRETDROP_PLUGIN_DIR . 'templates/shortcode-create.php';
         if (file_exists($template_path)) {
             include $template_path;
         } else {
-            echo '<div class="secureshare-error">' .
-                 esc_html__('Template not found', 'secureshare') .
+            echo '<div class="secretdrop-error">' .
+                 esc_html__('Template not found', 'secretdrop') .
                  '</div>';
         }
 
@@ -128,31 +128,31 @@ class SecureShare_Shortcodes {
      */
     private function render_view_template($token) {
         // Validate token format
-        if (!SecureShare_Encryption::is_valid_token($token)) {
-            return '<div class="secureshare-error">' .
-                   esc_html__('Invalid secret token format', 'secureshare') .
+        if (!SecretDrop_Encryption::is_valid_token($token)) {
+            return '<div class="secretdrop-error">' .
+                   esc_html__('Invalid secret token format', 'secretdrop') .
                    '</div>';
         }
 
         // Retrieve secret from database
-        $secret_data = SecureShare_DB::retrieve_secret($token);
+        $secret_data = SecretDrop_DB::retrieve_secret($token);
 
         if (is_wp_error($secret_data)) {
-            return '<div class="secureshare-error">' .
-                   '<h2>' . esc_html__('Secret Not Found', 'secureshare') . '</h2>' .
+            return '<div class="secretdrop-error">' .
+                   '<h2>' . esc_html__('Secret Not Found', 'secretdrop') . '</h2>' .
                    '<p>' . esc_html($secret_data->get_error_message()) . '</p>' .
                    '</div>';
         }
 
         // Decrypt the secret
-        $decrypted = SecureShare_Encryption::decrypt(
+        $decrypted = SecretDrop_Encryption::decrypt(
             $secret_data['encrypted'],
             $secret_data['iv']
         );
 
         if (is_wp_error($decrypted)) {
-            return '<div class="secureshare-error">' .
-                   '<h2>' . esc_html__('Decryption Failed', 'secureshare') . '</h2>' .
+            return '<div class="secretdrop-error">' .
+                   '<h2>' . esc_html__('Decryption Failed', 'secretdrop') . '</h2>' .
                    '<p>' . esc_html($decrypted->get_error_message()) . '</p>' .
                    '</div>';
         }
@@ -167,12 +167,12 @@ class SecureShare_Shortcodes {
         );
 
         // Load template
-        $template_path = SECURESHARE_PLUGIN_DIR . 'templates/shortcode-view.php';
+        $template_path = SECRETDROP_PLUGIN_DIR . 'templates/shortcode-view.php';
         if (file_exists($template_path)) {
             include $template_path;
         } else {
-            echo '<div class="secureshare-error">' .
-                 esc_html__('Template not found', 'secureshare') .
+            echo '<div class="secretdrop-error">' .
+                 esc_html__('Template not found', 'secretdrop') .
                  '</div>';
         }
 
@@ -190,9 +190,9 @@ class SecureShare_Shortcodes {
             return sanitize_text_field(wp_unslash($_GET['token']));
         }
 
-        // Check secureshare_token parameter (fallback)
-        if (isset($_GET['secureshare_token'])) {
-            return sanitize_text_field(wp_unslash($_GET['secureshare_token']));
+        // Check secretdrop_token parameter (fallback)
+        if (isset($_GET['secretdrop_token'])) {
+            return sanitize_text_field(wp_unslash($_GET['secretdrop_token']));
         }
 
         return null;

@@ -11,82 +11,82 @@ if (!defined('WPINC')) {
     die;
 }
 
-$secureshare_max_size = $data['max_secret_size'];
-$secureshare_expiration_hours = round($data['expiration_time'] / 3600);
+$secretdrop_max_size = $data['max_secret_size'];
+$secretdrop_expiration_hours = round($data['expiration_time'] / 3600);
 ?>
 
-<div class="secureshare-container">
-    <div class="secureshare-header">
-        <h2><?php esc_html_e('Share a Secret Securely', 'secureshare'); ?></h2>
-        <p class="secureshare-description">
+<div class="secretdrop-container">
+    <div class="secretdrop-header">
+        <h2><?php esc_html_e('Share a Secret Securely', 'secretdrop'); ?></h2>
+        <p class="secretdrop-description">
             <?php
             printf(
                 /* translators: %d: number of hours until link expires */
-                esc_html__('Create an encrypted link that expires in %d hours. Perfect for sharing passwords, API keys, or other sensitive information.', 'secureshare'),
-                (int) $secureshare_expiration_hours
+                esc_html__('Create an encrypted link that expires in %d hours. Perfect for sharing passwords, API keys, or other sensitive information.', 'secretdrop'),
+                (int) $secretdrop_expiration_hours
             ); ?>
         </p>
     </div>
 
-    <form id="secureshare-form" class="secureshare-form" method="post">
-        <div class="secureshare-form-group">
-            <label for="secureshare-secret">
-                <?php esc_html_e('Your Secret', 'secureshare'); ?>
+    <form id="secretdrop-form" class="secretdrop-form" method="post">
+        <div class="secretdrop-form-group">
+            <label for="secretdrop-secret">
+                <?php esc_html_e('Your Secret', 'secretdrop'); ?>
             </label>
             <textarea
-                id="secureshare-secret"
+                id="secretdrop-secret"
                 name="secret"
-                class="secureshare-textarea"
-                placeholder="<?php esc_attr_e('Enter your password, API key, or other sensitive information...', 'secureshare'); ?>"
-                maxlength="<?php echo esc_attr($secureshare_max_size); ?>"
+                class="secretdrop-textarea"
+                placeholder="<?php esc_attr_e('Enter your password, API key, or other sensitive information...', 'secretdrop'); ?>"
+                maxlength="<?php echo esc_attr($secretdrop_max_size); ?>"
                 required
             ></textarea>
-            <div class="secureshare-char-counter">
-                <span id="secureshare-char-count">0</span> / <?php echo esc_html($secureshare_max_size); ?> <?php esc_html_e('characters', 'secureshare'); ?>
+            <div class="secretdrop-char-counter">
+                <span id="secretdrop-char-count">0</span> / <?php echo esc_html($secretdrop_max_size); ?> <?php esc_html_e('characters', 'secretdrop'); ?>
             </div>
         </div>
 
-        <div class="secureshare-info-box">
-            <strong><?php esc_html_e('Security Features:', 'secureshare'); ?></strong>
+        <div class="secretdrop-info-box">
+            <strong><?php esc_html_e('Security Features:', 'secretdrop'); ?></strong>
             <ul>
-                <li><?php esc_html_e('AES-256-CBC encryption', 'secureshare'); ?></li>
+                <li><?php esc_html_e('AES-256-CBC encryption', 'secretdrop'); ?></li>
                 <li><?php
                 printf(
                     /* translators: %d: number of hours until secret expires */
-                    esc_html__('Automatically expires in %d hours', 'secureshare'),
-                    (int) $secureshare_expiration_hours
+                    esc_html__('Automatically expires in %d hours', 'secretdrop'),
+                    (int) $secretdrop_expiration_hours
                 ); ?></li>
-                <li><?php esc_html_e('Unique encrypted link generated', 'secureshare'); ?></li>
-                <li><?php esc_html_e('No permanent storage', 'secureshare'); ?></li>
+                <li><?php esc_html_e('Unique encrypted link generated', 'secretdrop'); ?></li>
+                <li><?php esc_html_e('No permanent storage', 'secretdrop'); ?></li>
             </ul>
         </div>
 
-        <button type="submit" class="secureshare-button secureshare-button-primary">
-            <?php esc_html_e('Create Secure Link', 'secureshare'); ?>
+        <button type="submit" class="secretdrop-button secretdrop-button-primary">
+            <?php esc_html_e('Create Secure Link', 'secretdrop'); ?>
         </button>
 
-        <div id="secureshare-message" class="secureshare-message" style="display: none;"></div>
+        <div id="secretdrop-message" class="secretdrop-message" style="display: none;"></div>
     </form>
 
-    <div id="secureshare-result" class="secureshare-result" style="display: none;">
-        <div class="secureshare-success-icon">✓</div>
-        <h3><?php esc_html_e('Secure Link Created!', 'secureshare'); ?></h3>
-        <p><?php esc_html_e('Share this link with the recipient. It will expire automatically.', 'secureshare'); ?></p>
+    <div id="secretdrop-result" class="secretdrop-result" style="display: none;">
+        <div class="secretdrop-success-icon">&#10003;</div>
+        <h3><?php esc_html_e('Secure Link Created!', 'secretdrop'); ?></h3>
+        <p><?php esc_html_e('Share this link with the recipient. It will expire automatically.', 'secretdrop'); ?></p>
 
-        <div class="secureshare-url-container">
+        <div class="secretdrop-url-container">
             <input
                 type="text"
-                id="secureshare-url"
-                class="secureshare-url-input"
+                id="secretdrop-url"
+                class="secretdrop-url-input"
                 readonly
             />
-            <button type="button" id="secureshare-copy-btn" class="secureshare-button secureshare-button-secondary">
-                <?php esc_html_e('Copy Link', 'secureshare'); ?>
+            <button type="button" id="secretdrop-copy-btn" class="secretdrop-button secretdrop-button-secondary">
+                <?php esc_html_e('Copy Link', 'secretdrop'); ?>
             </button>
         </div>
 
-        <button type="button" id="secureshare-create-another" class="secureshare-button secureshare-button-link">
-            <?php esc_html_e('Create Another Secret', 'secureshare'); ?>
+        <button type="button" id="secretdrop-create-another" class="secretdrop-button secretdrop-button-link">
+            <?php esc_html_e('Create Another Secret', 'secretdrop'); ?>
         </button>
     </div>
 </div>

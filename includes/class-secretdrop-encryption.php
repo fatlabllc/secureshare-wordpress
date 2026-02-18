@@ -1,6 +1,6 @@
 <?php
 /**
- * Encryption handler for SecureShare.
+ * Encryption handler for SecretDrop.
  *
  * Handles encryption and decryption of secrets using AES-256-CBC with OpenSSL.
  * Uses a configurable encryption key stored in WordPress options.
@@ -10,7 +10,7 @@ if (!defined('WPINC')) {
     die;
 }
 
-class SecureShare_Encryption {
+class SecretDrop_Encryption {
 
     /**
      * Encryption method/cipher.
@@ -32,10 +32,10 @@ class SecureShare_Encryption {
      */
     public static function encrypt($plaintext) {
         // Get encryption key from WordPress options
-        $encryption_key = get_option('secureshare_encryption_key');
+        $encryption_key = get_option('secretdrop_encryption_key');
 
         if (empty($encryption_key)) {
-            return new WP_Error('no_encryption_key', __('Encryption key is not configured', 'secureshare'));
+            return new WP_Error('no_encryption_key', __('Encryption key is not configured', 'secretdrop'));
         }
 
         // Generate a unique token for this secret (16 bytes = 32 hex chars)
@@ -62,7 +62,7 @@ class SecureShare_Encryption {
         if ($encrypted === false) {
             $error_msg = openssl_error_string();
             /* translators: %s: OpenSSL error message */
-            return new WP_Error('encryption_failed', sprintf(__('Encryption failed: %s', 'secureshare'), $error_msg));
+            return new WP_Error('encryption_failed', sprintf(__('Encryption failed: %s', 'secretdrop'), $error_msg));
         }
 
         return array(
@@ -84,10 +84,10 @@ class SecureShare_Encryption {
      */
     public static function decrypt($encrypted, $iv) {
         // Get encryption key from WordPress options
-        $encryption_key = get_option('secureshare_encryption_key');
+        $encryption_key = get_option('secretdrop_encryption_key');
 
         if (empty($encryption_key)) {
-            return new WP_Error('no_encryption_key', __('Encryption key is not configured', 'secureshare'));
+            return new WP_Error('no_encryption_key', __('Encryption key is not configured', 'secretdrop'));
         }
 
         // Create encryption key using SHA-256
@@ -106,7 +106,7 @@ class SecureShare_Encryption {
         );
 
         if ($decrypted === false) {
-            return new WP_Error('decryption_failed', __('Failed to decrypt secret', 'secureshare'));
+            return new WP_Error('decryption_failed', __('Failed to decrypt secret', 'secretdrop'));
         }
 
         return $decrypted;
@@ -156,7 +156,7 @@ class SecureShare_Encryption {
         return array(
             'method' => self::ENCRYPTION_METHOD,
             'openssl_available' => self::is_openssl_available(),
-            'key_configured' => !empty(get_option('secureshare_encryption_key'))
+            'key_configured' => !empty(get_option('secretdrop_encryption_key'))
         );
     }
 }

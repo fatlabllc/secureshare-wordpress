@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin interface for SecureShare.
+ * Admin interface for SecretDrop.
  *
  * Handles the admin settings page, configuration, and statistics display.
  */
@@ -9,7 +9,7 @@ if (!defined('WPINC')) {
     die;
 }
 
-class SecureShare_Admin {
+class SecretDrop_Admin {
 
     /**
      * Constructor - registers admin hooks.
@@ -18,9 +18,9 @@ class SecureShare_Admin {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
-        add_action('admin_post_secureshare_generate_key', array($this, 'handle_generate_key'));
-        add_action('admin_post_secureshare_manual_cleanup', array($this, 'handle_manual_cleanup'));
-        add_action('admin_post_secureshare_clear_rate_limits', array($this, 'handle_clear_rate_limits'));
+        add_action('admin_post_secretdrop_generate_key', array($this, 'handle_generate_key'));
+        add_action('admin_post_secretdrop_manual_cleanup', array($this, 'handle_manual_cleanup'));
+        add_action('admin_post_secretdrop_clear_rate_limits', array($this, 'handle_clear_rate_limits'));
     }
 
     /**
@@ -28,10 +28,10 @@ class SecureShare_Admin {
      */
     public function add_admin_menu() {
         add_options_page(
-            __('SecureShare Settings', 'secureshare'),
-            __('SecureShare', 'secureshare'),
+            __('SecretDrop Settings', 'secretdrop'),
+            __('SecretDrop', 'secretdrop'),
             'manage_options',
-            'secureshare',
+            'secretdrop',
             array($this, 'render_admin_page')
         );
     }
@@ -41,50 +41,50 @@ class SecureShare_Admin {
      */
     public function register_settings() {
         // General settings
-        register_setting('secureshare_general', 'secureshare_encryption_key', array(
+        register_setting('secretdrop_general', 'secretdrop_encryption_key', array(
             'type' => 'string',
             'sanitize_callback' => array($this, 'sanitize_encryption_key')
         ));
 
-        register_setting('secureshare_general', 'secureshare_expiration_time', array(
+        register_setting('secretdrop_general', 'secretdrop_expiration_time', array(
             'type' => 'integer',
             'default' => 86400,
             'sanitize_callback' => array($this, 'sanitize_expiration_time')
         ));
 
-        register_setting('secureshare_general', 'secureshare_max_secret_size', array(
+        register_setting('secretdrop_general', 'secretdrop_max_secret_size', array(
             'type' => 'integer',
             'default' => 2000,
             'sanitize_callback' => 'absint'
         ));
 
         // Rate limiting settings
-        register_setting('secureshare_rate_limiting', 'secureshare_rate_limit_enabled', array(
+        register_setting('secretdrop_rate_limiting', 'secretdrop_rate_limit_enabled', array(
             'type' => 'string',
             'default' => '1',
             'sanitize_callback' => array($this, 'sanitize_checkbox')
         ));
 
-        register_setting('secureshare_rate_limiting', 'secureshare_rate_limit_max', array(
+        register_setting('secretdrop_rate_limiting', 'secretdrop_rate_limit_max', array(
             'type' => 'integer',
             'default' => 5,
             'sanitize_callback' => 'absint'
         ));
 
-        register_setting('secureshare_rate_limiting', 'secureshare_rate_limit_window', array(
+        register_setting('secretdrop_rate_limiting', 'secretdrop_rate_limit_window', array(
             'type' => 'integer',
             'default' => 3600,
             'sanitize_callback' => array($this, 'sanitize_rate_limit_window')
         ));
 
         // Advanced settings
-        register_setting('secureshare_advanced', 'secureshare_debug_mode', array(
+        register_setting('secretdrop_advanced', 'secretdrop_debug_mode', array(
             'type' => 'string',
             'default' => '0',
             'sanitize_callback' => array($this, 'sanitize_checkbox')
         ));
 
-        register_setting('secureshare_advanced', 'secureshare_custom_css', array(
+        register_setting('secretdrop_advanced', 'secretdrop_custom_css', array(
             'type' => 'string',
             'default' => '',
             'sanitize_callback' => 'wp_strip_all_tags'
@@ -96,26 +96,26 @@ class SecureShare_Admin {
      */
     public function enqueue_admin_assets($hook) {
         // Only load on our settings page
-        if ($hook !== 'settings_page_secureshare') {
+        if ($hook !== 'settings_page_secretdrop') {
             return;
         }
 
         wp_enqueue_script(
-            'secureshare-admin',
-            SECURESHARE_PLUGIN_URL . 'assets/js/admin.js',
+            'secretdrop-admin',
+            SECRETDROP_PLUGIN_URL . 'assets/js/admin.js',
             array('jquery'),
-            SECURESHARE_VERSION,
+            SECRETDROP_VERSION,
             true
         );
 
-        wp_localize_script('secureshare-admin', 'secureshareAdmin', array(
-            'nonce' => wp_create_nonce('secureshare_admin'),
+        wp_localize_script('secretdrop-admin', 'secretdropAdmin', array(
+            'nonce' => wp_create_nonce('secretdrop_admin'),
             'adminPostUrl' => admin_url('admin-post.php'),
-            'generateKeyNonce' => wp_create_nonce('secureshare_generate_key'),
+            'generateKeyNonce' => wp_create_nonce('secretdrop_generate_key'),
             'strings' => array(
-                'confirmKeyRegen' => __('WARNING: Regenerating the encryption key will make all existing secrets unrecoverable. Are you sure?', 'secureshare'),
-                'confirmClearRateLimits' => __('Are you sure you want to clear all rate limit records?', 'secureshare'),
-                'keyCopied' => __('Encryption key copied to clipboard', 'secureshare')
+                'confirmKeyRegen' => __('WARNING: Regenerating the encryption key will make all existing secrets unrecoverable. Are you sure?', 'secretdrop'),
+                'confirmClearRateLimits' => __('Are you sure you want to clear all rate limit records?', 'secretdrop'),
+                'keyCopied' => __('Encryption key copied to clipboard', 'secretdrop')
             )
         ));
     }
@@ -125,14 +125,14 @@ class SecureShare_Admin {
      */
     public function render_admin_page() {
         if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'secureshare'));
+            wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'secretdrop'));
         }
 
         // Get current tab
         $active_tab = isset($_GET['tab']) ? sanitize_text_field(wp_unslash($_GET['tab'])) : 'general';
 
         // Load template
-        include SECURESHARE_PLUGIN_DIR . 'templates/admin-settings.php';
+        include SECRETDROP_PLUGIN_DIR . 'templates/admin-settings.php';
     }
 
     /**
@@ -140,19 +140,19 @@ class SecureShare_Admin {
      */
     public function handle_generate_key() {
         // Verify nonce and capabilities
-        if (!isset($_POST['secureshare_nonce']) ||
-            !wp_verify_nonce(wp_unslash($_POST['secureshare_nonce']), 'secureshare_generate_key') ||
+        if (!isset($_POST['secretdrop_nonce']) ||
+            !wp_verify_nonce(wp_unslash($_POST['secretdrop_nonce']), 'secretdrop_generate_key') ||
             !current_user_can('manage_options')) {
-            wp_die(esc_html__('Security check failed', 'secureshare'));
+            wp_die(esc_html__('Security check failed', 'secretdrop'));
         }
 
         // Generate new key
-        $new_key = SecureShare_Encryption::generate_key();
-        update_option('secureshare_encryption_key', $new_key);
+        $new_key = SecretDrop_Encryption::generate_key();
+        update_option('secretdrop_encryption_key', $new_key);
 
         // Redirect back with success message
         wp_safe_redirect(add_query_arg(array(
-            'page' => 'secureshare',
+            'page' => 'secretdrop',
             'tab' => 'general',
             'message' => 'key_generated'
         ), admin_url('options-general.php')));
@@ -164,18 +164,18 @@ class SecureShare_Admin {
      */
     public function handle_manual_cleanup() {
         // Verify nonce and capabilities
-        if (!isset($_POST['secureshare_nonce']) ||
-            !wp_verify_nonce(wp_unslash($_POST['secureshare_nonce']), 'secureshare_manual_cleanup') ||
+        if (!isset($_POST['secretdrop_nonce']) ||
+            !wp_verify_nonce(wp_unslash($_POST['secretdrop_nonce']), 'secretdrop_manual_cleanup') ||
             !current_user_can('manage_options')) {
-            wp_die(esc_html__('Security check failed', 'secureshare'));
+            wp_die(esc_html__('Security check failed', 'secretdrop'));
         }
 
         // Run cleanup
-        $result = SecureShare_Cron::manual_cleanup();
+        $result = SecretDrop_Cron::manual_cleanup();
 
         // Redirect back with success message
         wp_safe_redirect(add_query_arg(array(
-            'page' => 'secureshare',
+            'page' => 'secretdrop',
             'tab' => 'advanced',
             'message' => 'cleanup_done',
             'secrets_deleted' => $result['secrets_deleted'],
@@ -189,18 +189,18 @@ class SecureShare_Admin {
      */
     public function handle_clear_rate_limits() {
         // Verify nonce and capabilities
-        if (!isset($_POST['secureshare_nonce']) ||
-            !wp_verify_nonce(wp_unslash($_POST['secureshare_nonce']), 'secureshare_clear_rate_limits') ||
+        if (!isset($_POST['secretdrop_nonce']) ||
+            !wp_verify_nonce(wp_unslash($_POST['secretdrop_nonce']), 'secretdrop_clear_rate_limits') ||
             !current_user_can('manage_options')) {
-            wp_die(esc_html__('Security check failed', 'secureshare'));
+            wp_die(esc_html__('Security check failed', 'secretdrop'));
         }
 
         // Clear rate limits
-        SecureShare_DB::clear_all_rate_limits();
+        SecretDrop_DB::clear_all_rate_limits();
 
         // Redirect back with success message
         wp_safe_redirect(add_query_arg(array(
-            'page' => 'secureshare',
+            'page' => 'secretdrop',
             'tab' => 'rate_limiting',
             'message' => 'rate_limits_cleared'
         ), admin_url('options-general.php')));
@@ -217,12 +217,12 @@ class SecureShare_Admin {
         // Must be 64 character hex string
         if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
             add_settings_error(
-                'secureshare_encryption_key',
+                'secretdrop_encryption_key',
                 'invalid_key',
-                __('Encryption key must be a 64-character hexadecimal string', 'secureshare')
+                __('Encryption key must be a 64-character hexadecimal string', 'secretdrop')
             );
             // Return old value
-            return get_option('secureshare_encryption_key');
+            return get_option('secretdrop_encryption_key');
         }
 
         return $value;
@@ -245,9 +245,9 @@ class SecureShare_Admin {
         // Minimum 1 hour
         if ($hours < 1) {
             add_settings_error(
-                'secureshare_expiration_time',
+                'secretdrop_expiration_time',
                 'invalid_expiration',
-                __('Expiration time must be at least 1 hour', 'secureshare')
+                __('Expiration time must be at least 1 hour', 'secretdrop')
             );
             // Return default (24 hours in seconds)
             return 86400;
@@ -267,9 +267,9 @@ class SecureShare_Admin {
         // Minimum 1 hour
         if ($hours < 1) {
             add_settings_error(
-                'secureshare_rate_limit_window',
+                'secretdrop_rate_limit_window',
                 'invalid_window',
-                __('Rate limit window must be at least 1 hour', 'secureshare')
+                __('Rate limit window must be at least 1 hour', 'secretdrop')
             );
             // Return default (1 hour in seconds)
             return 3600;
@@ -283,14 +283,14 @@ class SecureShare_Admin {
      * Get statistics for display.
      */
     public static function get_statistics() {
-        return SecureShare_DB::get_statistics();
+        return SecretDrop_DB::get_statistics();
     }
 
     /**
      * Get rate limit records for display.
      */
     public static function get_rate_limit_records() {
-        return SecureShare_DB::get_rate_limit_records(20);
+        return SecretDrop_DB::get_rate_limit_records(20);
     }
 
     /**
@@ -299,19 +299,19 @@ class SecureShare_Admin {
     public static function format_duration($seconds) {
         if ($seconds < 60) {
             /* translators: %d: number of seconds */
-            return sprintf(_n('%d second', '%d seconds', $seconds, 'secureshare'), $seconds);
+            return sprintf(_n('%d second', '%d seconds', $seconds, 'secretdrop'), $seconds);
         } elseif ($seconds < 3600) {
             $minutes = floor($seconds / 60);
             /* translators: %d: number of minutes */
-            return sprintf(_n('%d minute', '%d minutes', $minutes, 'secureshare'), $minutes);
+            return sprintf(_n('%d minute', '%d minutes', $minutes, 'secretdrop'), $minutes);
         } elseif ($seconds < 86400) {
             $hours = floor($seconds / 3600);
             /* translators: %d: number of hours */
-            return sprintf(_n('%d hour', '%d hours', $hours, 'secureshare'), $hours);
+            return sprintf(_n('%d hour', '%d hours', $hours, 'secretdrop'), $hours);
         } else {
             $days = floor($seconds / 86400);
             /* translators: %d: number of days */
-            return sprintf(_n('%d day', '%d days', $days, 'secureshare'), $days);
+            return sprintf(_n('%d day', '%d days', $days, 'secretdrop'), $days);
         }
     }
 }

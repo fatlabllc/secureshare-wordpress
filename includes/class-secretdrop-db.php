@@ -1,6 +1,6 @@
 <?php
 /**
- * Database operations for SecureShare.
+ * Database operations for SecretDrop.
  *
  * Handles storage and retrieval of encrypted secrets,
  * rate limiting, and cleanup operations.
@@ -10,7 +10,7 @@ if (!defined('WPINC')) {
     die;
 }
 
-class SecureShare_DB {
+class SecretDrop_DB {
 
     /**
      * Store a new secret in the database.
@@ -23,8 +23,8 @@ class SecureShare_DB {
     public static function store_secret($token, $encrypted, $iv) {
         global $wpdb;
 
-        $table = secureshare_get_secrets_table();
-        $expiration_time = get_option('secureshare_expiration_time', 86400);
+        $table = secretdrop_get_secrets_table();
+        $expiration_time = get_option('secretdrop_expiration_time', 86400);
 
         $current_time = current_time('mysql');
         $expires_at = gmdate('Y-m-d H:i:s', strtotime($current_time) + $expiration_time);
@@ -42,7 +42,7 @@ class SecureShare_DB {
         );
 
         if ($result === false) {
-            return new WP_Error('db_insert_error', __('Failed to store secret', 'secureshare'));
+            return new WP_Error('db_insert_error', __('Failed to store secret', 'secretdrop'));
         }
 
         // Cleanup expired secrets (opportunistic)
@@ -60,7 +60,7 @@ class SecureShare_DB {
     public static function retrieve_secret($token) {
         global $wpdb;
 
-        $table = secureshare_get_secrets_table();
+        $table = secretdrop_get_secrets_table();
         $current_time = current_time('mysql');
 
         $secret = $wpdb->get_row($wpdb->prepare(
@@ -70,7 +70,7 @@ class SecureShare_DB {
         ), ARRAY_A);
 
         if (!$secret) {
-            return new WP_Error('secret_not_found', __('Secret not found or expired', 'secureshare'));
+            return new WP_Error('secret_not_found', __('Secret not found or expired', 'secretdrop'));
         }
 
         return $secret;
@@ -85,7 +85,7 @@ class SecureShare_DB {
     public static function delete_secret($token) {
         global $wpdb;
 
-        $table = secureshare_get_secrets_table();
+        $table = secretdrop_get_secrets_table();
 
         $result = $wpdb->delete(
             $table,
@@ -104,7 +104,7 @@ class SecureShare_DB {
     public static function cleanup_expired_secrets() {
         global $wpdb;
 
-        $table = secureshare_get_secrets_table();
+        $table = secretdrop_get_secrets_table();
         $current_time = current_time('mysql');
 
         $deleted = $wpdb->query($wpdb->prepare(
@@ -113,7 +113,7 @@ class SecureShare_DB {
         ));
 
         // Update last cleanup time
-        update_option('secureshare_last_cleanup', current_time('timestamp'));
+        update_option('secretdrop_last_cleanup', current_time('timestamp'));
 
         return $deleted !== false ? $deleted : 0;
     }
@@ -125,15 +125,15 @@ class SecureShare_DB {
      */
     public static function check_rate_limit() {
         // Check if rate limiting is enabled
-        if (!get_option('secureshare_rate_limit_enabled', '1')) {
+        if (!get_option('secretdrop_rate_limit_enabled', '1')) {
             return true;
         }
 
         global $wpdb;
 
-        $table = secureshare_get_rate_limits_table();
-        $max_requests = intval(get_option('secureshare_rate_limit_max', 5));
-        $window_seconds = intval(get_option('secureshare_rate_limit_window', 3600));
+        $table = secretdrop_get_rate_limits_table();
+        $max_requests = intval(get_option('secretdrop_rate_limit_max', 5));
+        $window_seconds = intval(get_option('secretdrop_rate_limit_window', 3600));
 
         // Get client IP and hash it for privacy
         $ip = self::get_client_ip();
@@ -171,7 +171,7 @@ class SecureShare_DB {
                         'rate_limit_exceeded',
                         sprintf(
                             /* translators: %d: number of minutes until rate limit resets */
-                            __('Rate limit exceeded. Please try again in %d minutes.', 'secureshare'),
+                            __('Rate limit exceeded. Please try again in %d minutes.', 'secretdrop'),
                             ceil($time_remaining / 60)
                         )
                     );
@@ -210,7 +210,7 @@ class SecureShare_DB {
     public static function cleanup_rate_limits() {
         global $wpdb;
 
-        $table = secureshare_get_rate_limits_table();
+        $table = secretdrop_get_rate_limits_table();
         $cutoff = gmdate('Y-m-d H:i:s', current_time('timestamp') - (7 * 24 * 3600)); // 7 days ago
 
         $deleted = $wpdb->query($wpdb->prepare(
@@ -229,8 +229,8 @@ class SecureShare_DB {
     public static function get_statistics() {
         global $wpdb;
 
-        $secrets_table = secureshare_get_secrets_table();
-        $rate_limits_table = secureshare_get_rate_limits_table();
+        $secrets_table = secretdrop_get_secrets_table();
+        $rate_limits_table = secretdrop_get_rate_limits_table();
         $current_time = current_time('mysql');
 
         // Total secrets created (we can only count current ones, not historical)
@@ -256,7 +256,7 @@ class SecureShare_DB {
         ));
 
         // Last cleanup time
-        $last_cleanup = get_option('secureshare_last_cleanup', 0);
+        $last_cleanup = get_option('secretdrop_last_cleanup', 0);
 
         return array(
             'total_secrets' => intval($total_secrets),
@@ -304,14 +304,14 @@ class SecureShare_DB {
      * @return bool|WP_Error True if valid, WP_Error if too large.
      */
     public static function validate_secret_size($secret) {
-        $max_size = intval(get_option('secureshare_max_secret_size', 2000));
+        $max_size = intval(get_option('secretdrop_max_secret_size', 2000));
 
         if (strlen($secret) > $max_size) {
             return new WP_Error(
                 'secret_too_large',
                 sprintf(
                     /* translators: %d: maximum number of characters allowed */
-                    __('Secret exceeds maximum size of %d characters', 'secureshare'),
+                    __('Secret exceeds maximum size of %d characters', 'secretdrop'),
                     $max_size
                 )
             );
@@ -328,7 +328,7 @@ class SecureShare_DB {
     public static function get_rate_limit_records($limit = 50) {
         global $wpdb;
 
-        $table = secureshare_get_rate_limits_table();
+        $table = secretdrop_get_rate_limits_table();
 
         $records = $wpdb->get_results(
             $wpdb->prepare(
@@ -349,7 +349,7 @@ class SecureShare_DB {
     public static function clear_all_rate_limits() {
         global $wpdb;
 
-        $table = secureshare_get_rate_limits_table();
+        $table = secretdrop_get_rate_limits_table();
         $result = $wpdb->query("TRUNCATE TABLE $table");
 
         return $result !== false;

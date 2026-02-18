@@ -1,10 +1,10 @@
-=== SecureShare ===
+=== SecretDrop ===
 Contributors: fatlabwebsupport
 Tags: security, password, secret, encryption, sharing
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.7
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ Securely share passwords and sensitive information via time-limited, encrypted l
 
 == Description ==
 
-SecureShare allows you to securely share sensitive information like passwords, API keys, and other secrets through encrypted, time-limited links. Perfect for developers, system administrators, and anyone who needs to share confidential information securely.
+SecretDrop allows you to securely share sensitive information like passwords, API keys, and other secrets through encrypted, time-limited links. Perfect for developers, system administrators, and anyone who needs to share confidential information securely.
 
 = Key Features =
 
@@ -41,17 +41,17 @@ SecureShare allows you to securely share sensitive information like passwords, A
 * **Random IVs**: Initialization vectors prevent pattern detection
 * **Input Sanitization**: All inputs are properly sanitized and validated
 * **Output Escaping**: All outputs are properly escaped for XSS prevention
-* **Nonce Protection**: CSRF protection on all forms and AJAX requests
+* **Nonce Protection**: CSRF protection on all forms and REST API requests
 * **Rate Limiting**: Configurable IP-based rate limiting prevents abuse
 
 = Shortcode =
 
-Use the `[secureshare]` shortcode on any page or post. It automatically detects whether to show the create form or view interface based on the URL.
+Use the `[secretdrop]` shortcode on any page or post. It automatically detects whether to show the create form or view interface based on the URL.
 
 * When visited normally (e.g., `/share/`) - Shows the create secret form
 * When visited with a token (e.g., `/share/?token=abc123`) - Shows the secret viewer
 
-Simply add `[secureshare]` to your page content and it handles everything!
+Simply add `[secretdrop]` to your page content and it handles everything!
 
 = Admin Features =
 
@@ -85,28 +85,28 @@ Simply add `[secureshare]` to your page content and it handles everything!
 
 1. Log in to your WordPress admin panel
 2. Navigate to Plugins > Add New
-3. Search for "SecureShare"
+3. Search for "SecretDrop"
 4. Click "Install Now" and then "Activate"
-5. Go to Settings > SecureShare to configure
+5. Go to Settings > SecretDrop to configure
 
 = Manual Installation =
 
 1. Download the plugin zip file
 2. Extract the zip file
-3. Upload the `secureshare` folder to `/wp-content/plugins/`
+3. Upload the `secretdrop` folder to `/wp-content/plugins/`
 4. Activate the plugin through the 'Plugins' menu in WordPress
-5. Go to Settings > SecureShare to configure
+5. Go to Settings > SecretDrop to configure
 
 = After Installation =
 
 1. Create a new page (e.g., "Share Secret")
-2. Add the `[secureshare]` shortcode to the page
+2. Add the `[secretdrop]` shortcode to the page
 3. Publish the page
 4. Users can now create and view secrets from that page
 
 = Configuration =
 
-1. Navigate to Settings > SecureShare
+1. Navigate to Settings > SecretDrop
 2. Review the automatically generated encryption key
 3. Adjust expiration time if needed (default: 24 hours)
 4. Configure rate limiting settings
@@ -116,7 +116,7 @@ Simply add `[secureshare]` to your page content and it handles everything!
 
 = Is this plugin secure? =
 
-Yes! SecureShare uses AES-256-CBC encryption, the same standard used by banks and governments. Each secret is encrypted with a unique initialization vector, and the encryption key is stored securely in your WordPress database.
+Yes! SecretDrop uses AES-256-CBC encryption, the same standard used by banks and governments. Each secret is encrypted with a unique initialization vector, and the encryption key is stored securely in your WordPress database.
 
 = Can secrets be viewed more than once? =
 
@@ -128,7 +128,7 @@ Expired secrets are automatically deleted from the database by a scheduled cron 
 
 = Can I change the expiration time? =
 
-Yes! Go to Settings > SecureShare > General and adjust the "Expiration Time" setting. The default is 86400 seconds (24 hours).
+Yes! Go to Settings > SecretDrop > General and adjust the "Expiration Time" setting. The default is 86400 seconds (24 hours).
 
 = Does this work with any WordPress theme? =
 
@@ -136,7 +136,7 @@ Yes! The plugin uses namespaced CSS classes to avoid conflicts with your theme. 
 
 = Can I limit how many secrets users can create? =
 
-Yes! Rate limiting is enabled by default. Go to Settings > SecureShare > Rate Limiting to configure the maximum number of secrets per IP address per time window.
+Yes! Rate limiting is enabled by default. Go to Settings > SecretDrop > Rate Limiting to configure the maximum number of secrets per IP address per time window.
 
 = What if I change the encryption key? =
 
@@ -144,29 +144,29 @@ WARNING: Changing the encryption key will make all existing secrets unrecoverabl
 
 = Is multisite supported? =
 
-Version 1.0 is designed for single-site WordPress installations. Multisite support may be added in a future version.
+Version 1.1 is designed for single-site WordPress installations. Multisite support may be added in a future version.
 
 = Does this plugin phone home or use external services? =
 
-No! SecureShare is completely self-contained. It doesn't make any external API calls or send data to third-party services.
+No! SecretDrop is completely self-contained. It doesn't make any external API calls or send data to third-party services.
 
 = Can I customize the appearance? =
 
-Yes! You can add custom CSS in Settings > SecureShare > Advanced. All plugin elements use the `.secureshare-` CSS prefix. See the "CSS Customization Guide" section below for detailed examples.
+Yes! You can add custom CSS in Settings > SecretDrop > Advanced. All plugin elements use the `.secretdrop-` CSS prefix. See the "CSS Customization Guide" section below for detailed examples.
 
 == CSS Customization Guide ==
 
-All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts with your theme. You can customize the appearance by adding CSS to Settings > SecureShare > Advanced > Custom CSS.
+All SecretDrop elements are namespaced with `.secretdrop-` to avoid conflicts with your theme. You can customize the appearance by adding CSS to Settings > SecretDrop > Advanced > Custom CSS.
 
 = Color Scheme Customization =
 
 **Primary Button Color (Create Secure Link button):**
 ```css
-.secureshare-button-primary {
+.secretdrop-button-primary {
     background-color: #your-brand-color;
     border-color: #your-brand-color;
 }
-.secureshare-button-primary:hover {
+.secretdrop-button-primary:hover {
     background-color: #your-darker-color;
     border-color: #your-darker-color;
 }
@@ -174,7 +174,7 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Secondary Button Color (Copy buttons):**
 ```css
-.secureshare-button-secondary {
+.secretdrop-button-secondary {
     background-color: #6c757d;
     border-color: #6c757d;
 }
@@ -182,7 +182,7 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Info Boxes (Security features display):**
 ```css
-.secureshare-info-box {
+.secretdrop-info-box {
     background: #e8f4f8;
     border: 1px solid #bee5eb;
 }
@@ -190,7 +190,7 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Warning Boxes:**
 ```css
-.secureshare-warning-box {
+.secretdrop-warning-box {
     background: #fff3cd;
     border: 1px solid #ffeaa7;
 }
@@ -200,14 +200,14 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Change Font Family:**
 ```css
-.secureshare-container {
+.secretdrop-container {
     font-family: 'Your Font', sans-serif;
 }
 ```
 
 **Secret Display Font (monospace for passwords/keys):**
 ```css
-.secureshare-secret-content {
+.secretdrop-secret-content {
     font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
     font-size: 1rem;
 }
@@ -215,7 +215,7 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Heading Styles:**
 ```css
-.secureshare-header h2 {
+.secretdrop-header h2 {
     color: #2c3e50;
     font-size: 2.5rem;
     font-weight: 700;
@@ -226,21 +226,21 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Container Width:**
 ```css
-.secureshare-container {
+.secretdrop-container {
     max-width: 1000px; /* Default: 800px */
 }
 ```
 
 **Form Padding:**
 ```css
-.secureshare-form {
+.secretdrop-form {
     padding: 3rem; /* Default: 2rem */
 }
 ```
 
 **Secret Box Styling:**
 ```css
-.secureshare-secret-box {
+.secretdrop-secret-box {
     padding: 2.5rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
@@ -250,14 +250,14 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Rounded Buttons:**
 ```css
-.secureshare-button {
+.secretdrop-button {
     border-radius: 50px; /* Pill-shaped buttons */
 }
 ```
 
 **Larger Buttons:**
 ```css
-.secureshare-button {
+.secretdrop-button {
     padding: 1rem 2rem;
     font-size: 1.125rem;
 }
@@ -265,7 +265,7 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Remove Button Hover Effects:**
 ```css
-.secureshare-button:hover {
+.secretdrop-button:hover {
     transform: none;
     box-shadow: none;
 }
@@ -275,13 +275,13 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Textarea Styling:**
 ```css
-.secureshare-textarea {
+.secretdrop-textarea {
     background-color: #f8f9fa;
     border: 2px solid #dee2e6;
     font-size: 1.125rem;
     min-height: 200px;
 }
-.secureshare-textarea:focus {
+.secretdrop-textarea:focus {
     border-color: #your-brand-color;
     box-shadow: 0 0 0 0.2rem rgba(your-rgb, 0.25);
 }
@@ -289,7 +289,7 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Character Counter Color:**
 ```css
-.secureshare-char-counter {
+.secretdrop-char-counter {
     color: #your-color;
     font-size: 1rem;
 }
@@ -299,7 +299,7 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Success Messages:**
 ```css
-.secureshare-success {
+.secretdrop-success {
     background-color: #d4edda;
     border-color: #c3e6cb;
     color: #155724;
@@ -308,7 +308,7 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Error Messages:**
 ```css
-.secureshare-error {
+.secretdrop-error {
     background-color: #f8d7da;
     border-color: #f5c6cb;
     color: #721c24;
@@ -317,7 +317,7 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Success Icon (checkmark circle):**
 ```css
-.secureshare-success-icon {
+.secretdrop-success-icon {
     background: #28a745;
     width: 80px;
     height: 80px;
@@ -329,25 +329,25 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **Complete Dark Mode Override:**
 ```css
-.secureshare-container {
+.secretdrop-container {
     color: #e4e4e4;
 }
-.secureshare-form,
-.secureshare-secret-box {
+.secretdrop-form,
+.secretdrop-secret-box {
     background: #2d2d2d;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
-.secureshare-header h2,
-.secureshare-view-header h2 {
+.secretdrop-header h2,
+.secretdrop-view-header h2 {
     color: #ffffff;
 }
-.secureshare-textarea,
-.secureshare-secret-content {
+.secretdrop-textarea,
+.secretdrop-secret-content {
     background: #1a1a1a;
     border-color: #444;
     color: #e4e4e4;
 }
-.secureshare-info-box {
+.secretdrop-info-box {
     background: #1a3a4a;
     border-color: #2a5a6a;
 }
@@ -357,21 +357,21 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 
 **High Contrast Mode:**
 ```css
-.secureshare-button-primary {
+.secretdrop-button-primary {
     background-color: #000;
     border: 3px solid #000;
 }
-.secureshare-button-primary:hover {
+.secretdrop-button-primary:hover {
     background-color: #333;
 }
 ```
 
 **Larger Text for Better Readability:**
 ```css
-.secureshare-container {
+.secretdrop-container {
     font-size: 1.125rem;
 }
-.secureshare-button {
+.secretdrop-button {
     font-size: 1.25rem;
     padding: 1rem 2rem;
 }
@@ -382,10 +382,10 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 **Adjust Mobile Breakpoints:**
 ```css
 @media (max-width: 768px) {
-    .secureshare-container {
+    .secretdrop-container {
         padding: 0 10px;
     }
-    .secureshare-form {
+    .secretdrop-form {
         padding: 1.5rem;
     }
 }
@@ -396,23 +396,23 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 **Match Your Brand Colors:**
 ```css
 /* Brand Primary Color: #FF6B35 (example) */
-.secureshare-button-primary {
+.secretdrop-button-primary {
     background-color: #FF6B35;
     border-color: #FF6B35;
 }
-.secureshare-button-primary:hover {
+.secretdrop-button-primary:hover {
     background-color: #E85A2B;
     border-color: #E85A2B;
 }
-.secureshare-textarea:focus {
+.secretdrop-textarea:focus {
     border-color: #FF6B35;
     box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
 }
-.secureshare-info-box {
+.secretdrop-info-box {
     background: #FFF5F2;
     border-color: #FFCAB8;
 }
-.secureshare-info-box li::before {
+.secretdrop-info-box li::before {
     color: #FF6B35;
 }
 ```
@@ -420,7 +420,7 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 = Tips for Custom CSS =
 
 1. **Use Browser DevTools**: Right-click on any element and select "Inspect" to see its CSS classes
-2. **Specificity**: All classes use `.secureshare-` prefix. Use this in your selectors for proper specificity
+2. **Specificity**: All classes use `.secretdrop-` prefix. Use this in your selectors for proper specificity
 3. **!important**: Avoid using `!important` unless necessary. The CSS is designed to be easily overridable
 4. **Test Responsive**: Always test your customizations on mobile devices
 5. **Copy Before Editing**: Copy the original CSS rules before modifying to easily revert changes
@@ -428,21 +428,21 @@ All SecureShare elements are namespaced with `.secureshare-` to avoid conflicts 
 = Finding CSS Classes =
 
 All major elements have descriptive classes:
-- `.secureshare-container` - Main wrapper
-- `.secureshare-form` - Create secret form
-- `.secureshare-textarea` - Secret input textarea
-- `.secureshare-button` - All buttons
-- `.secureshare-button-primary` - Primary action buttons
-- `.secureshare-button-secondary` - Secondary action buttons
-- `.secureshare-secret-box` - Secret display container
-- `.secureshare-secret-content` - The actual secret text
-- `.secureshare-info-box` - Information boxes
-- `.secureshare-warning-box` - Warning boxes
-- `.secureshare-result` - Success result display
-- `.secureshare-url-input` - Generated URL input field
+- `.secretdrop-container` - Main wrapper
+- `.secretdrop-form` - Create secret form
+- `.secretdrop-textarea` - Secret input textarea
+- `.secretdrop-button` - All buttons
+- `.secretdrop-button-primary` - Primary action buttons
+- `.secretdrop-button-secondary` - Secondary action buttons
+- `.secretdrop-secret-box` - Secret display container
+- `.secretdrop-secret-content` - The actual secret text
+- `.secretdrop-info-box` - Information boxes
+- `.secretdrop-warning-box` - Warning boxes
+- `.secretdrop-result` - Success result display
+- `.secretdrop-url-input` - Generated URL input field
 
 For a complete list of classes, view the plugin's CSS file at:
-`wp-content/plugins/secureshare/assets/css/secureshare.css`
+`wp-content/plugins/secretdrop/assets/css/secretdrop.css`
 
 == Screenshots ==
 
@@ -453,6 +453,13 @@ For a complete list of classes, view the plugin's CSS file at:
 5. Admin settings - Statistics dashboard
 
 == Changelog ==
+
+= 1.1.0 - 2025-11-23 =
+* Rename: Plugin renamed from SecureShare to SecretDrop (new slug: secretdrop)
+* Security: Added WP REST nonce (X-WP-Nonce header) for CSRF protection on secret creation
+* Security: Documented intentional public access on REST API permission callbacks
+* Update: All internal identifiers, text domain, CSS classes, and shortcodes renamed to secretdrop
+* Update: Shortcode changed from [secureshare] to [secretdrop]
 
 = 1.0.7 - 2025-11-12 =
 * Fix: WordPress.org Plugin Check compliance - all critical errors resolved
@@ -513,12 +520,15 @@ For a complete list of classes, view the plugin's CSS file at:
 
 == Upgrade Notice ==
 
+= 1.1.0 =
+Plugin renamed to SecretDrop. All shortcodes changed from [secureshare] to [secretdrop]. Update your pages accordingly.
+
 = 1.0.0 =
-Initial release of SecureShare plugin.
+Initial release of the plugin.
 
 == Privacy Policy ==
 
-SecureShare is designed with privacy in mind:
+SecretDrop is designed with privacy in mind:
 
 * **No External Services**: The plugin doesn't communicate with any external services
 * **IP Hashing**: IP addresses for rate limiting are hashed using SHA-256
@@ -533,7 +543,7 @@ If you enable debug mode, cleanup activities will be logged to your PHP error lo
 For support, please:
 
 1. Check the FAQ section above
-2. Visit the plugin's GitHub repository: https://github.com/fatlabllc/secureshare-php
+2. Visit the plugin's GitHub repository: https://github.com/fatlabllc/secretdrop-wordpress
 3. Contact FatLab Web Support: https://fatlabwebsupport.com
 
 == Credits ==

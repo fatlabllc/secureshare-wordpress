@@ -1,5 +1,5 @@
 /**
- * SecureShare Admin JavaScript
+ * SecretDrop Admin JavaScript
  * Handles admin panel functionality
  */
 
@@ -9,29 +9,29 @@
     $(document).ready(function() {
 
         // Regenerate encryption key button
-        $('#secureshare-regenerate-key-btn').on('click', function(e) {
+        $('#secretdrop-regenerate-key-btn').on('click', function(e) {
             e.preventDefault();
 
-            if (!confirm(secureshareAdmin.strings.confirmKeyRegen)) {
+            if (!confirm(secretdropAdmin.strings.confirmKeyRegen)) {
                 return;
             }
 
             // Create form and submit
             var form = $('<form>', {
                 'method': 'POST',
-                'action': secureshareAdmin.adminPostUrl
+                'action': secretdropAdmin.adminPostUrl
             });
 
             form.append($('<input>', {
                 'type': 'hidden',
                 'name': 'action',
-                'value': 'secureshare_generate_key'
+                'value': 'secretdrop_generate_key'
             }));
 
             form.append($('<input>', {
                 'type': 'hidden',
-                'name': 'secureshare_nonce',
-                'value': secureshareAdmin.generateKeyNonce
+                'name': 'secretdrop_nonce',
+                'value': secretdropAdmin.generateKeyNonce
             }));
 
             $('body').append(form);
@@ -39,7 +39,7 @@
         });
 
         // Manual cleanup button
-        $('#secureshare-manual-cleanup-btn').on('click', function(e) {
+        $('#secretdrop-manual-cleanup-btn').on('click', function(e) {
             e.preventDefault();
 
             if (!confirm('Are you sure you want to manually trigger cleanup of expired secrets?')) {
@@ -48,18 +48,18 @@
 
             var form = $('<form>', {
                 'method': 'POST',
-                'action': secureshareAdmin.adminPostUrl
+                'action': secretdropAdmin.adminPostUrl
             });
 
             form.append($('<input>', {
                 'type': 'hidden',
                 'name': 'action',
-                'value': 'secureshare_manual_cleanup'
+                'value': 'secretdrop_manual_cleanup'
             }));
 
             form.append($('<input>', {
                 'type': 'hidden',
-                'name': 'secureshare_nonce',
+                'name': 'secretdrop_nonce',
                 'value': wp.ajax.settings.nonce
             }));
 
@@ -68,27 +68,27 @@
         });
 
         // Clear rate limits button
-        $('#secureshare-clear-rate-limits-btn').on('click', function(e) {
+        $('#secretdrop-clear-rate-limits-btn').on('click', function(e) {
             e.preventDefault();
 
-            if (!confirm(secureshareAdmin.strings.confirmClearRateLimits)) {
+            if (!confirm(secretdropAdmin.strings.confirmClearRateLimits)) {
                 return;
             }
 
             var form = $('<form>', {
                 'method': 'POST',
-                'action': secureshareAdmin.adminPostUrl
+                'action': secretdropAdmin.adminPostUrl
             });
 
             form.append($('<input>', {
                 'type': 'hidden',
                 'name': 'action',
-                'value': 'secureshare_clear_rate_limits'
+                'value': 'secretdrop_clear_rate_limits'
             }));
 
             form.append($('<input>', {
                 'type': 'hidden',
-                'name': 'secureshare_nonce',
+                'name': 'secretdrop_nonce',
                 'value': wp.ajax.settings.nonce
             }));
 
@@ -97,7 +97,7 @@
         });
 
         // Copy encryption key to clipboard
-        $('#secureshare_encryption_key').on('click', function() {
+        $('#secretdrop_encryption_key').on('click', function() {
             this.select();
             this.setSelectionRange(0, 99999);
 
@@ -107,7 +107,7 @@
                 var originalBg = $(this).css('background-color');
                 $(this).css('background-color', '#d4edda');
                 setTimeout(function() {
-                    $('#secureshare_encryption_key').css('background-color', originalBg);
+                    $('#secretdrop_encryption_key').css('background-color', originalBg);
                 }, 500);
             } catch (err) {
                 console.error('Copy failed:', err);
