@@ -96,6 +96,17 @@
             form.submit();
         });
 
+        // Confirm before regenerating or removing the API key
+        $('form[data-secretdrop-confirm]').on('submit', function() {
+            var message = secretdropAdmin.strings[$(this).data('secretdrop-confirm')];
+            return message ? confirm(message) : true;
+        });
+
+        // Select the newly generated API key on click
+        $('#secretdrop_new_api_key').on('click focus', function() {
+            this.select();
+        });
+
         // Copy encryption key to clipboard
         $('#secretdrop_encryption_key').on('click', function() {
             this.select();

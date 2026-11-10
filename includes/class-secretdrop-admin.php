@@ -21,6 +21,8 @@ class SecretDrop_Admin {
         add_action('admin_post_secretdrop_generate_key', array($this, 'handle_generate_key'));
         add_action('admin_post_secretdrop_manual_cleanup', array($this, 'handle_manual_cleanup'));
         add_action('admin_post_secretdrop_clear_rate_limits', array($this, 'handle_clear_rate_limits'));
+        add_action('admin_post_secretdrop_generate_api_key', array($this, 'handle_generate_api_key'));
+        add_action('admin_post_secretdrop_clear_api_key', array($this, 'handle_clear_api_key'));
     }
 
     /**
@@ -115,6 +117,8 @@ class SecretDrop_Admin {
             'strings' => array(
                 'confirmKeyRegen' => __('WARNING: Regenerating the encryption key will make all existing secrets unrecoverable. Are you sure?', 'secretdrop'),
                 'confirmClearRateLimits' => __('Are you sure you want to clear all rate limit records?', 'secretdrop'),
+                'confirmApiKeyRegen' => __('Regenerating the API key will stop the current key from working. Continue?', 'secretdrop'),
+                'confirmApiKeyClear' => __('Remove the API key? Clients using it will get a 401 error until a new key is set.', 'secretdrop'),
                 'keyCopied' => __('Encryption key copied to clipboard', 'secretdrop')
             )
         ));
@@ -203,6 +207,72 @@ class SecretDrop_Admin {
             'page' => 'secretdrop',
             'tab' => 'rate_limiting',
             'message' => 'rate_limits_cleared'
+        ), admin_url('options-general.php')));
+        exit;
+    }
+
+    /**
+     * Transient name used to show a newly generated API key once to the admin who made it.
+     */
+    public static function new_api_key_transient() {
+        return 'secretdrop_new_api_key_' . get_current_user_id();
+    }
+
+    /**
+     * Fetch (and forget) a newly generated API key for display.
+     *
+     * @return string The plain key, or an empty string if there is none to show.
+     */
+    public static function pop_new_api_key() {
+        $transient = self::new_api_key_transient();
+        $key = get_transient($transient);
+        delete_transient($transient);
+
+        return is_string($key) && preg_match('/^[a-f0-9]{64}$/', $key) ? $key : '';
+    }
+
+    /**
+     * Handle API key generation (or regeneration).
+     *
+     * Only a hash of the key is stored. The plain key is kept in a short-lived
+     * transient so it can be shown once on the settings page.
+     */
+    public function handle_generate_api_key() {
+        check_admin_referer('secretdrop_generate_api_key', 'secretdrop_nonce');
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('Security check failed', 'secretdrop'));
+        }
+
+        $new_key = SecretDrop_API::generate_api_key();
+        update_option(SecretDrop_API::API_KEY_HASH_OPTION, SecretDrop_API::hash_api_key($new_key), false);
+        update_option(SecretDrop_API::API_KEY_CREATED_OPTION, time(), false);
+        set_transient(self::new_api_key_transient(), $new_key, 5 * MINUTE_IN_SECONDS);
+
+        wp_safe_redirect(add_query_arg(array(
+            'page' => 'secretdrop',
+            'tab' => 'api',
+            'message' => 'api_key_generated'
+        ), admin_url('options-general.php')));
+        exit;
+    }
+
+    /**
+     * Handle API key removal.
+     */
+    public function handle_clear_api_key() {
+        check_admin_referer('secretdrop_clear_api_key', 'secretdrop_nonce');
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('Security check failed', 'secretdrop'));
+        }
+
+        delete_option(SecretDrop_API::API_KEY_HASH_OPTION);
+        delete_option(SecretDrop_API::API_KEY_CREATED_OPTION);
+        delete_transient(self::new_api_key_transient());
+
+        wp_safe_redirect(add_query_arg(array(
+            'page' => 'secretdrop',
+            'tab' => 'api',
+            'message' => 'api_key_cleared'
         ), admin_url('options-general.php')));
         exit;
     }

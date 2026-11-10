@@ -27,6 +27,16 @@ if (isset($_GET['message'])) {
                  sprintf(esc_html__('Cleanup completed: %1$d expired secrets and %2$d old rate limit records removed.', 'secretdrop'), (int) $secretdrop_secrets, (int) $secretdrop_rate_limits) .
                  '</p></div>';
             break;
+        case 'api_key_generated':
+            echo '<div class="notice notice-success is-dismissible"><p>' .
+                 esc_html__('API key generated. Any previous key no longer works.', 'secretdrop') .
+                 '</p></div>';
+            break;
+        case 'api_key_cleared':
+            echo '<div class="notice notice-success is-dismissible"><p>' .
+                 esc_html__('API key removed.', 'secretdrop') .
+                 '</p></div>';
+            break;
         case 'rate_limits_cleared':
             echo '<div class="notice notice-success is-dismissible"><p>' .
                  esc_html__('All rate limit records cleared successfully.', 'secretdrop') .
@@ -47,6 +57,9 @@ settings_errors();
         </a>
         <a href="?page=secretdrop&tab=rate_limiting" class="nav-tab <?php echo $active_tab === 'rate_limiting' ? 'nav-tab-active' : ''; ?>">
             <?php esc_html_e('Rate Limiting', 'secretdrop'); ?>
+        </a>
+        <a href="?page=secretdrop&tab=api" class="nav-tab <?php echo $active_tab === 'api' ? 'nav-tab-active' : ''; ?>">
+            <?php esc_html_e('API', 'secretdrop'); ?>
         </a>
         <a href="?page=secretdrop&tab=advanced" class="nav-tab <?php echo $active_tab === 'advanced' ? 'nav-tab-active' : ''; ?>">
             <?php esc_html_e('Advanced', 'secretdrop'); ?>
@@ -226,6 +239,82 @@ settings_errors();
             <p><?php esc_html_e('No rate limit records found.', 'secretdrop'); ?></p>
         <?php endif; ?>
 
+    <?php elseif ($active_tab === 'api'): ?>
+        <!-- API Tab -->
+        <?php
+        $secretdrop_new_api_key = SecretDrop_Admin::pop_new_api_key();
+        $secretdrop_has_api_key = SecretDrop_API::has_api_key();
+        $secretdrop_create_url = rest_url('secretdrop/v1/create');
+        ?>
+
+        <p><?php esc_html_e('The create endpoint is always public and rate limited. An optional API key lets a trusted client (a script, CLI, or helpdesk integration) create secrets without the rate limit. Requests that send a wrong key are rejected with a 401 error.', 'secretdrop'); ?></p>
+
+        <?php if ('' !== $secretdrop_new_api_key): ?>
+            <div class="notice notice-warning inline">
+                <p><strong><?php esc_html_e('Copy this API key now. It will not be shown again.', 'secretdrop'); ?></strong></p>
+                <p>
+                    <input type="text" id="secretdrop_new_api_key" class="large-text code" readonly
+                           value="<?php echo esc_attr($secretdrop_new_api_key); ?>" />
+                </p>
+            </div>
+        <?php endif; ?>
+
+        <table class="form-table">
+            <tr>
+                <th scope="row"><?php esc_html_e('API Key', 'secretdrop'); ?></th>
+                <td>
+                    <?php if ($secretdrop_has_api_key): ?>
+                        <p>
+                            <?php
+                            $secretdrop_api_key_created = (int) get_option(SecretDrop_API::API_KEY_CREATED_OPTION, 0);
+                            if ($secretdrop_api_key_created > 0) {
+                                printf(
+                                    /* translators: %s: date and time the API key was created */
+                                    esc_html__('An API key is set (created %s).', 'secretdrop'),
+                                    esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), $secretdrop_api_key_created))
+                                );
+                            } else {
+                                esc_html_e('An API key is set.', 'secretdrop');
+                            }
+                            ?>
+                        </p>
+                        <p class="description"><?php esc_html_e('Only a hash of the key is stored, so it cannot be displayed again. Regenerate it if it was lost.', 'secretdrop'); ?></p>
+                    <?php else: ?>
+                        <p><?php esc_html_e('No API key is set. The endpoint only accepts rate-limited requests without a key.', 'secretdrop'); ?></p>
+                    <?php endif; ?>
+
+                    <div style="margin-top: 10px; display: flex; gap: 8px;">
+                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>"
+                              <?php echo $secretdrop_has_api_key ? 'data-secretdrop-confirm="confirmApiKeyRegen"' : ''; ?>>
+                            <input type="hidden" name="action" value="secretdrop_generate_api_key" />
+                            <?php wp_nonce_field('secretdrop_generate_api_key', 'secretdrop_nonce'); ?>
+                            <button type="submit" class="button button-secondary">
+                                <?php echo $secretdrop_has_api_key ? esc_html__('Regenerate API Key', 'secretdrop') : esc_html__('Generate API Key', 'secretdrop'); ?>
+                            </button>
+                        </form>
+
+                        <?php if ($secretdrop_has_api_key): ?>
+                            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" data-secretdrop-confirm="confirmApiKeyClear">
+                                <input type="hidden" name="action" value="secretdrop_clear_api_key" />
+                                <?php wp_nonce_field('secretdrop_clear_api_key', 'secretdrop_nonce'); ?>
+                                <button type="submit" class="button button-link-delete">
+                                    <?php esc_html_e('Remove API Key', 'secretdrop'); ?>
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <h2><?php esc_html_e('Usage', 'secretdrop'); ?></h2>
+        <p><?php esc_html_e('Send the key in an Authorization: Bearer header. If your server strips the Authorization header, send it in an X-SecretDrop-Key header instead.', 'secretdrop'); ?></p>
+        <pre style="background: #f6f7f7; padding: 12px; overflow-x: auto;"><code>curl -X POST <?php echo esc_html($secretdrop_create_url); ?> \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"secret":"the password to share"}'</code></pre>
+        <p class="description"><?php esc_html_e('A successful request returns HTTP 201 with JSON containing success, token, url, and expires_in.', 'secretdrop'); ?></p>
+
     <?php elseif ($active_tab === 'advanced'): ?>
         <!-- Advanced Settings Tab -->
         <form method="post" action="options.php">
@@ -372,6 +461,10 @@ settings_errors();
                         }
                         ?>
                     </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('API Key', 'secretdrop'); ?></th>
+                    <td><?php echo SecretDrop_API::has_api_key() ? esc_html__('Set', 'secretdrop') : esc_html__('Not set', 'secretdrop'); ?></td>
                 </tr>
                 <tr>
                     <th><?php esc_html_e('Debug Mode', 'secretdrop'); ?></th>

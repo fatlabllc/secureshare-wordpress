@@ -28,6 +28,8 @@ $secretdrop_options = array(
     'secretdrop_debug_mode',
     'secretdrop_custom_css',
     'secretdrop_last_cleanup',
+    'secretdrop_api_key_hash',
+    'secretdrop_api_key_created',
     'secretdrop_version'
 );
 

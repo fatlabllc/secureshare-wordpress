@@ -4,7 +4,7 @@ Tags: security, password, secret, encryption, sharing
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,6 +20,7 @@ SecretDrop allows you to securely share sensitive information like passwords, AP
 * **Time-Limited Links** - Secrets automatically expire after 24 hours (configurable)
 * **No Burn After Reading** - Recipients can view secrets multiple times until expiration
 * **IP-Based Rate Limiting** - Prevents abuse with configurable rate limits
+* **Optional API Key** - Let trusted scripts and integrations create secrets without the rate limit
 * **Database Storage** - Uses custom WordPress database tables for reliable storage
 * **Multiple Shortcodes** - Flexible display options with smart routing
 * **Clean, Modern UI** - Responsive design works on all devices
@@ -58,6 +59,7 @@ Simply add `[secretdrop]` to your page content and it handles everything!
 * **Encryption Key Management**: Auto-generate secure encryption keys
 * **Configurable Expiration**: Set custom expiration times
 * **Rate Limit Controls**: Configure abuse prevention settings
+* **API Key**: Generate, regenerate, or remove an optional key for the REST API
 * **Statistics Dashboard**: View plugin usage statistics
 * **Manual Cleanup**: Trigger cleanup of expired secrets
 * **Custom CSS**: Add custom styling to match your theme
@@ -153,6 +155,34 @@ No! SecretDrop is completely self-contained. It doesn't make any external API ca
 = Can I customize the appearance? =
 
 Yes! You can add custom CSS in Settings > SecretDrop > Advanced. All plugin elements use the `.secretdrop-` CSS prefix. See the "CSS Customization Guide" section below for detailed examples.
+
+== REST API ==
+
+Secrets can be created over the REST API, for example from a script, CLI tool, or helpdesk integration.
+
+`POST /wp-json/secretdrop/v1/create` with a JSON body containing `secret`.
+
+The endpoint is public and rate limited per IP address, exactly like the shortcode form. To let a trusted client skip the rate limit, generate an API key in Settings > SecretDrop > API. The key is shown once; only a hash of it is stored. Send it in one of these headers:
+
+* `Authorization: Bearer YOUR_API_KEY`
+* `X-SecretDrop-Key: YOUR_API_KEY` (use this if your server, often Apache, strips the Authorization header)
+
+Example:
+
+`curl -X POST https://example.com/wp-json/secretdrop/v1/create -H "Authorization: Bearer YOUR_API_KEY" -H "Content-Type: application/json" -d '{"secret":"the password to share"}'`
+
+A successful request returns HTTP 201:
+
+`{"success":true,"token":"...","url":"https://example.com/share/?token=...","expires_in":86400}`
+
+Responses:
+
+* `201` Secret created
+* `400` Missing, empty, or oversized secret
+* `401` An API key was sent but it is wrong (or no key is configured)
+* `429` Rate limit exceeded (requests without a valid key only)
+
+Requests without a key behave exactly as before. Create responses are sent with `Cache-Control: no-store`. Only the Bearer scheme is read from the Authorization header, so Basic auth on a password-protected staging site does not interfere.
 
 == CSS Customization Guide ==
 
@@ -454,6 +484,14 @@ For a complete list of classes, view the plugin's CSS file at:
 
 == Changelog ==
 
+= 1.2.0 - 2026-11-10 =
+* New: Optional API key (Settings > SecretDrop > API). Requests to the create endpoint with a valid key skip the rate limit
+* New: API key accepted in the Authorization: Bearer header or the X-SecretDrop-Key header
+* Security: Only a SHA-256 hash of the API key is stored and keys are compared with hash_equals
+* Security: A wrong API key is rejected with HTTP 401
+* Security: Create endpoint responses now send Cache-Control: no-store
+* Docs: REST API section with a curl example
+
 = 1.1.0 - 2025-11-23 =
 * Rename: Plugin renamed from SecureShare to SecretDrop (new slug: secretdrop)
 * Security: Added WP REST nonce (X-WP-Nonce header) for CSRF protection on secret creation
@@ -519,6 +557,9 @@ For a complete list of classes, view the plugin's CSS file at:
 * WordPress Coding Standards compliant
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Adds an optional API key for creating secrets from scripts and integrations. No changes are needed for existing pages.
 
 = 1.1.0 =
 Plugin renamed to SecretDrop. All shortcodes changed from [secureshare] to [secretdrop]. Update your pages accordingly.
