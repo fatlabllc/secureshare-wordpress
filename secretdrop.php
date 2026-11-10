@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: SecretDrop
- * Plugin URI: https://github.com/fatlabllc/secretdrop-wordpress
+ * Plugin URI: https://github.com/fatlabllc/secureshare-wordpress
  * Description: Securely share passwords and sensitive information via time-limited, encrypted links. Create secrets that automatically expire after 24 hours.
  * Version: 1.2.0
  * Requires at least: 6.0

@@ -584,7 +584,7 @@ If you enable debug mode, cleanup activities will be logged to your PHP error lo
 For support, please:
 
 1. Check the FAQ section above
-2. Visit the plugin's GitHub repository: https://github.com/fatlabllc/secretdrop-wordpress
+2. Visit the plugin's GitHub repository: https://github.com/fatlabllc/secureshare-wordpress
 3. Contact FatLab Web Support: https://fatlabwebsupport.com
 
 == Credits ==
